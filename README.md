@@ -1,6 +1,6 @@
 
 
-<img width="405" height="406" alt="favicon" src="https://github.com/user-attachments/assets/13a6536a-ae95-49a8-8a11-052ea972de8c" />
+<img width="305" height="306" alt="favicon" src="https://github.com/user-attachments/assets/13a6536a-ae95-49a8-8a11-052ea972de8c" />
 
 # IlèTô - Plateforme d'Intelligence Territoriale du Bénin
 
