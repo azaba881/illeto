@@ -2,6 +2,9 @@
 {% load static %}
 {% block extra_head %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" referrerpolicy="no-referrer" />
+{% if mapbox_access_token %}
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet" />
+{% endif %}
 <script>window.__atlasUserType = "{{ atlas_user_type|escapejs }}";</script>
 <style>
   /* Carte centrée entre panneaux fixes (gauche w-72 left-6, droite w-72 right-20) — tokens glass / bordures */
@@ -34,10 +37,22 @@
     width: 100%;
     background: #03050c;
   }
+  .atlas-mb-base {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+  }
+  .atlas-mb-base .mapboxgl-ctrl-logo {
+    opacity: 0.85;
+  }
   #map .leaflet-container {
     font-family: inherit;
     background: #03050c;
     z-index: 1;
+  }
+  .atlas-map-wrap.atlas-use-mapbox-base #map .leaflet-container {
+    background: transparent !important;
   }
   .atlas-map-loading {
     position: absolute;
@@ -280,11 +295,14 @@
       <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse at center, transparent 30%, oklch(0.08 0.01 160 / 0.7) 100%);"></div>
     </div>
 
-    <div class="atlas-map-wrap" aria-label="Carte des départements">
+    <div class="atlas-map-wrap{% if mapbox_access_token %} atlas-use-mapbox-base{% endif %}" aria-label="Carte des départements" id="atlas-map-wrap-root">
       <div id="atlas-map-loading" class="atlas-map-loading" role="status" aria-live="polite">
         <span class="atlas-map-spinner" aria-hidden="true"></span>
         <span class="atlas-map-loading-label">Chargement des départements…</span>
       </div>
+      {% if mapbox_access_token %}
+      <div id="atlas-mb-base" class="atlas-mb-base" aria-hidden="true"></div>
+      {% endif %}
       <div id="map" role="application" aria-label="Carte interactive des départements"></div>
     </div>
 
@@ -436,18 +454,30 @@
           <p class="text-xs text-muted-foreground leading-relaxed">Locales, nationales ou mondiales : vos <span class="text-primary">Illeto</span> données au format de votre choix. Exportation des territoires et limites administratives du Bénin suivant vos critères de filtrages.</p>
         </div>
         <div class="p-4 space-y-3 border-b border-glass-border">
-          <div class="flex items-center gap-3 p-3 rounded-lg bg-secondary/30 border border-glass-border/50">
-            <i data-lucide="car" class="w-4 h-4 text-muted-foreground"></i>
-            <div class="flex-1">
-              <p class="text-[9px] uppercase tracking-wider text-muted-foreground">Système Utilisateur</p>
-              <p id="export-system-value" class="text-sm font-medium text-foreground">Existant</p>
+          <div>
+            <p class="text-[9px] uppercase tracking-wider text-muted-foreground mb-2">Système utilisateur (couche POI)</p>
+            <p id="export-system-value" class="sr-only">Existant</p>
+            <div class="grid grid-cols-3 gap-2">
+              <button type="button" data-atlas-poi-dataset="existing" class="flex flex-col items-center gap-1 p-2 rounded-xl border border-glass-border/60 bg-secondary/25 text-[10px] font-medium text-foreground hover:bg-secondary/45 transition-colors">
+                <i data-lucide="database" class="w-4 h-4 text-[#2dd4a0]"></i>
+                <span>Existant</span>
+              </button>
+              <button type="button" data-atlas-poi-dataset="offer" class="flex flex-col items-center gap-1 p-2 rounded-xl border border-glass-border/60 bg-secondary/25 text-[10px] font-medium text-foreground hover:bg-secondary/45 transition-colors">
+                <i data-lucide="briefcase" class="w-4 h-4 text-[#a67c52]"></i>
+                <span>Offre</span>
+              </button>
+              <button type="button" data-atlas-poi-dataset="discovery" class="flex flex-col items-center gap-1 p-2 rounded-xl border border-glass-border/60 bg-secondary/25 text-[10px] font-medium text-foreground hover:bg-secondary/45 transition-colors">
+                <i data-lucide="users" class="w-4 h-4 text-primary"></i>
+                <span>Découverte</span>
+              </button>
             </div>
+            <p class="text-[9px] text-muted-foreground/80 mt-2 leading-relaxed">Filtre les points selon la source en base (OSM / offres / crowdsourcing).</p>
           </div>
           <div class="flex items-center gap-3 p-3 rounded-lg bg-secondary/30 border border-glass-border/50">
             <i data-lucide="sparkles" class="w-4 h-4 text-[#a67c52]"></i>
-            <div class="flex-1">
-              <p class="text-[9px] uppercase tracking-wider text-muted-foreground">Offre</p>
-              <p id="atlas-offer-line" class="text-sm font-medium text-foreground">
+            <div class="flex-1 min-w-0">
+              <p class="text-[9px] uppercase tracking-wider text-muted-foreground">Votre offre IlèTô</p>
+              <p id="atlas-offer-line" class="text-xs font-medium text-foreground leading-snug">
                 {% if not user.is_authenticated %}Découverte{% elif atlas_user_type == "PROFESSIONAL" %}Professionnel · GeoJSON certifié{% elif atlas_user_type == "INSTITUTION" %}Institution{% else %}Étudiant / Exploration{% endif %}
               </p>
             </div>
@@ -505,10 +535,10 @@
         <button type="button" data-basemap="administrative" class="w-full text-left text-xs font-medium px-3 py-2 rounded-lg text-foreground/90 hover:text-primary transition-colors">Administratif</button>
       </div>
       <div id="atlas-perspective-extras-flyout" class="atlas-flyout-panel hidden rounded-xl py-2 px-2 min-w-[11.5rem] flex flex-col gap-1" role="menu" aria-label="Calques thématiques">
-        <p class="text-[9px] uppercase tracking-wider text-muted-foreground px-2 pb-1">Surcouches (maquette)</p>
-        <button type="button" data-extra-layer="relief" class="w-full text-left text-xs font-medium px-3 py-2 rounded-lg text-foreground/80 border border-transparent hover:border-slate-600/50 transition-colors">Relief</button>
-        <button type="button" data-extra-layer="traffic" class="w-full text-left text-xs font-medium px-3 py-2 rounded-lg text-foreground/80 border border-transparent hover:border-slate-600/50 transition-colors">Trafic</button>
-        <button type="button" data-extra-layer="transport" class="w-full text-left text-xs font-medium px-3 py-2 rounded-lg text-foreground/80 border border-transparent hover:border-slate-600/50 transition-colors">Transports</button>
+        <p class="text-[9px] uppercase tracking-wider text-muted-foreground px-2 pb-1">Surcouches</p>
+        <button type="button" data-extra-layer="relief" class="w-full text-left text-xs font-medium px-3 py-2 rounded-lg text-foreground/80 border border-transparent hover:border-slate-600/50 transition-colors">Relief (terrain)</button>
+        <button type="button" data-extra-layer="traffic" class="w-full text-left text-xs font-medium px-3 py-2 rounded-lg text-foreground/80 border border-transparent hover:border-slate-600/50 transition-colors">Trafic{% if not mapbox_access_token %} · token Mapbox{% endif %}</button>
+        <button type="button" data-extra-layer="transport" class="w-full text-left text-xs font-medium px-3 py-2 rounded-lg text-foreground/80 border border-transparent hover:border-slate-600/50 transition-colors">Transports (rails)</button>
       </div>
       <div class="atlas-glass-panel rounded-xl p-1.5 flex items-center gap-1 relative">
         <button type="button" data-atlas-open-basemap class="relative w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300 ease-out text-muted-foreground hover:text-primary hover:bg-slate-800/60" title="Fonds de carte" aria-expanded="false" aria-haspopup="true">
@@ -582,7 +612,15 @@
           </label>
           <label class="flex items-center gap-3 p-3 rounded-xl border border-glass-border/60 bg-secondary/25 cursor-pointer hover:border-[#00875a]/40 transition-colors has-[:checked]:border-[#00875a]/45 has-[:checked]:bg-[#00875a]/10">
             <input type="radio" name="atlas-export-fmt" value="vector_shp" class="w-4 h-4 accent-[#00875a]" />
-            <div class="flex-1 min-w-0"><p class="text-xs font-medium text-foreground">Shapefile</p><p class="text-[10px] text-muted-foreground">.zip — bundle prêt pour SIG</p></div>
+            <div class="flex-1 min-w-0"><p class="text-xs font-medium text-foreground">Shapefile</p><p class="text-[10px] text-muted-foreground">.zip — compte pro (serveur)</p></div>
+          </label>
+          <label class="flex items-center gap-3 p-3 rounded-xl border border-glass-border/60 bg-secondary/25 cursor-pointer hover:border-[#00875a]/40 transition-colors has-[:checked]:border-[#00875a]/45 has-[:checked]:bg-[#00875a]/10">
+            <input type="radio" name="atlas-export-fmt" value="vector_kml" class="w-4 h-4 accent-[#00875a]" />
+            <div class="flex-1 min-w-0"><p class="text-xs font-medium text-foreground">KML</p><p class="text-[10px] text-muted-foreground">Google Earth / outils terrain</p></div>
+          </label>
+          <label class="flex items-center gap-3 p-3 rounded-xl border border-glass-border/60 bg-secondary/25 cursor-pointer hover:border-[#00875a]/40 transition-colors has-[:checked]:border-[#00875a]/45 has-[:checked]:bg-[#00875a]/10">
+            <input type="radio" name="atlas-export-fmt" value="vector_csv" class="w-4 h-4 accent-[#00875a]" />
+            <div class="flex-1 min-w-0"><p class="text-xs font-medium text-foreground">CSV</p><p class="text-[10px] text-muted-foreground">Attributs + centroïde + WKT</p></div>
           </label>
           <p class="text-[9px] uppercase tracking-wider text-muted-foreground px-0.5 pt-2">Image / document</p>
           <label class="flex items-center gap-3 p-3 rounded-xl border border-glass-border/60 bg-secondary/25 cursor-pointer hover:border-[#00875a]/40 transition-colors has-[:checked]:border-[#00875a]/45 has-[:checked]:bg-[#00875a]/10">
@@ -614,6 +652,9 @@
 {% endblock %}
 
 {% block extra_js %}
+{% if mapbox_access_token %}
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js"></script>
+{% endif %}
 {{ block.super }}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" referrerpolicy="no-referrer"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -624,6 +665,8 @@
   var mapEl = document.getElementById("map");
   var loadingEl = document.getElementById("atlas-map-loading");
   if (!mapEl || typeof L === "undefined") return;
+
+  var ILLETO_MAPBOX_TOKEN = "{{ mapbox_access_token|default:''|escapejs }}";
 
   window.IlletoAtlasMap = window.IlletoAtlasMap || {};
 
@@ -645,11 +688,10 @@
     map.invalidateSize();
   }, 0);
 
-  /* CartoDB Dark Matter — fond premium sombre */
   var cartoAttribution =
     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> ' +
     '&copy; <a href="https://carto.com/attributions">CARTO</a>';
-  var layerDark = L.tileLayer(
+  var layerCartoDark = L.tileLayer(
     "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
     {
       attribution: cartoAttribution,
@@ -658,6 +700,40 @@
       crossOrigin: true,
     }
   );
+  var layerCartoLight = L.tileLayer(
+    "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+    {
+      attribution: cartoAttribution,
+      subdomains: "abcd",
+      maxZoom: 20,
+      crossOrigin: true,
+    }
+  );
+  var layerMbDark = null;
+  var layerMbLight = null;
+  if (ILLETO_MAPBOX_TOKEN) {
+    var mbat = encodeURIComponent(ILLETO_MAPBOX_TOKEN);
+    layerMbDark = L.tileLayer(
+      "https://api.mapbox.com/styles/v1/mapbox/dark-v11/tiles/512/{z}/{x}/{y}@2x?access_token=" +
+        mbat,
+      {
+        tileSize: 512,
+        zoomOffset: -1,
+        maxZoom: 22,
+        attribution: "© Mapbox © OpenStreetMap",
+      }
+    );
+    layerMbLight = L.tileLayer(
+      "https://api.mapbox.com/styles/v1/mapbox/light-v11/tiles/512/{z}/{x}/{y}@2x?access_token=" +
+        mbat,
+      {
+        tileSize: 512,
+        zoomOffset: -1,
+        maxZoom: 22,
+        attribution: "© Mapbox © OpenStreetMap",
+      }
+    );
+  }
   var layerSat = L.tileLayer(
     "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
     {
@@ -666,29 +742,249 @@
       crossOrigin: true,
     }
   );
-  var activeBasemapLayer = layerDark;
-  layerDark.addTo(map);
 
-  function switchBasemap(key) {
-    var wantSat = key === "satellite";
-    var next = wantSat ? layerSat : layerDark;
+  var useMbGlBase = !!(
+    ILLETO_MAPBOX_TOKEN &&
+    typeof mapboxgl !== "undefined" &&
+    document.getElementById("atlas-mb-base")
+  );
+  var mbBaseMap = null;
+  var mbStyleKey = "dark";
+
+  var mapThemeIsLight = false;
+  var basemapIsSatellite = false;
+  var activeBasemapLayer = null;
+
+  function rasterDarkLayer() {
+    return layerMbDark || layerCartoDark;
+  }
+  function rasterLightLayer() {
+    return layerMbLight || layerCartoLight;
+  }
+
+  function syncMbBaseFromLeaflet() {
+    if (!mbBaseMap) return;
+    try {
+      if (typeof mbBaseMap.isStyleLoaded === "function" && !mbBaseMap.isStyleLoaded()) {
+        return;
+      }
+    } catch (e) {
+      return;
+    }
+    var c = map.getCenter();
+    mbBaseMap.jumpTo({
+      center: [c.lng, c.lat],
+      zoom: map.getZoom(),
+      bearing: 0,
+      pitch: 0,
+    });
+  }
+
+  if (useMbGlBase) {
+    mapboxgl.accessToken = ILLETO_MAPBOX_TOKEN;
+    mbBaseMap = new mapboxgl.Map({
+      container: "atlas-mb-base",
+      style: "mapbox://styles/mapbox/dark-v11",
+      center: [2.3, 9.3],
+      zoom: 7,
+      interactive: false,
+      attributionControl: true,
+    });
+    window.__atlasMbglMap = mbBaseMap;
+    mbBaseMap.on("load", syncMbBaseFromLeaflet);
+    map.on("moveend", syncMbBaseFromLeaflet);
+    map.on("zoomend", syncMbBaseFromLeaflet);
+    mapEl.style.background = "transparent";
+  } else {
+    activeBasemapLayer = layerMbDark || layerCartoDark;
+    activeBasemapLayer.addTo(map);
+  }
+
+  function applyMbStyleFromTheme() {
+    if (!mbBaseMap) return;
+    var want = mapThemeIsLight ? "light" : "dark";
+    if (want === mbStyleKey) {
+      syncMbBaseFromLeaflet();
+      return;
+    }
+    mbStyleKey = want;
+    var url =
+      want === "light"
+        ? "mapbox://styles/mapbox/light-v11"
+        : "mapbox://styles/mapbox/dark-v11";
+    mbBaseMap.setStyle(url);
+    mbBaseMap.once("idle", syncMbBaseFromLeaflet);
+  }
+
+  function applyRasterBasemap() {
+    if (useMbGlBase && mbBaseMap) {
+      var mbEl = document.getElementById("atlas-mb-base");
+      if (basemapIsSatellite) {
+        if (mbEl) mbEl.style.visibility = "hidden";
+        var nextSat = layerSat;
+        if (activeBasemapLayer !== nextSat) {
+          if (activeBasemapLayer && map.hasLayer(activeBasemapLayer)) {
+            map.removeLayer(activeBasemapLayer);
+          }
+          nextSat.addTo(map);
+          activeBasemapLayer = nextSat;
+        }
+        return;
+      }
+      if (mbEl) mbEl.style.visibility = "visible";
+      if (activeBasemapLayer && map.hasLayer(activeBasemapLayer)) {
+        map.removeLayer(activeBasemapLayer);
+        activeBasemapLayer = null;
+      }
+      applyMbStyleFromTheme();
+      return;
+    }
+    var next = basemapIsSatellite
+      ? layerSat
+      : mapThemeIsLight
+        ? rasterLightLayer()
+        : rasterDarkLayer();
     if (activeBasemapLayer === next) return;
-    map.removeLayer(activeBasemapLayer);
+    if (activeBasemapLayer && map.hasLayer(activeBasemapLayer)) {
+      map.removeLayer(activeBasemapLayer);
+    }
     next.addTo(map);
     activeBasemapLayer = next;
   }
-  window.IlletoAtlasMap.switchBasemap = switchBasemap;
 
-  function baseStyle() {
+  function switchBasemap(key) {
+    basemapIsSatellite = key === "satellite";
+    applyRasterBasemap();
+  }
+
+  function setMapThemeLight(isLight) {
+    mapThemeIsLight = !!isLight;
+    if (!basemapIsSatellite) applyRasterBasemap();
+  }
+
+  function updateMapThemeToggleUI() {
+    var btn = document.getElementById("atlas-map-theme-toggle");
+    if (!btn) return;
+    var lab = btn.querySelector(".atlas-theme-label");
+    var id = btn.querySelector(".atlas-theme-icon-dark");
+    var il = btn.querySelector(".atlas-theme-icon-light");
+    if (mapThemeIsLight) {
+      if (lab) lab.textContent = "Carte claire";
+      if (id) id.classList.add("hidden");
+      if (il) il.classList.remove("hidden");
+    } else {
+      if (lab) lab.textContent = "Carte sombre";
+      if (id) id.classList.remove("hidden");
+      if (il) il.classList.add("hidden");
+    }
+  }
+
+  function toggleAtlasMapTheme() {
+    setMapThemeLight(!mapThemeIsLight);
+    updateMapThemeToggleUI();
+  }
+
+  window.IlletoAtlasMap.switchBasemap = switchBasemap;
+  window.IlletoAtlasMap.setMapThemeLight = setMapThemeLight;
+  window.IlletoAtlasMap.applyMapboxBasemapStyle = function () {
+    if (useMbGlBase && mbBaseMap && !basemapIsSatellite) applyMbStyleFromTheme();
+  };
+
+  var overlayRelief = L.tileLayer(
+    "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+    {
+      attribution:
+        '© <a href="https://opentopomap.org">OpenTopoMap</a> (ODbL)',
+      opacity: 0.38,
+      maxZoom: 17,
+    }
+  );
+  var overlayTraffic = null;
+  if (ILLETO_MAPBOX_TOKEN) {
+    overlayTraffic = L.tileLayer(
+      "https://api.mapbox.com/styles/v1/mapbox/traffic-day-v2/tiles/512/{z}/{x}/{y}@2x?access_token=" +
+        encodeURIComponent(ILLETO_MAPBOX_TOKEN),
+      {
+        tileSize: 512,
+        zoomOffset: -1,
+        maxZoom: 22,
+        opacity: 0.9,
+      }
+    );
+  }
+  var overlayRail = L.tileLayer(
+    "https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png",
+    {
+      attribution:
+        '© <a href="https://www.openrailwaymap.org/">OpenRailwayMap</a>',
+      opacity: 0.65,
+      maxZoom: 19,
+    }
+  );
+  var extraActive = { relief: false, traffic: false, transport: false };
+
+  function setExtraLayer(name, on) {
+    if (!Object.prototype.hasOwnProperty.call(extraActive, name)) return false;
+    var layer = null;
+    if (name === "relief") layer = overlayRelief;
+    if (name === "traffic") layer = overlayTraffic;
+    if (name === "transport") layer = overlayRail;
+    if (!layer) {
+      if (name === "traffic" && on) {
+        showAtlasToast(
+          "Couche trafic : définissez ILLETO_MAPBOX_ACCESS_TOKEN (Mapbox)."
+        );
+      }
+      return false;
+    }
+    extraActive[name] = !!on;
+    if (on) {
+      if (!map.hasLayer(layer)) layer.addTo(map);
+    } else if (map.hasLayer(layer)) {
+      map.removeLayer(layer);
+    }
+    return true;
+  }
+
+  var selectedDeptPk = "";
+  var selectedCommunePk = "";
+  var activeCommunesLayer = null;
+
+  function departmentStyleForFeature(feature) {
+    var fid =
+      feature.id != null && feature.id !== ""
+        ? String(feature.id)
+        : feature.properties && feature.properties.pk != null
+          ? String(feature.properties.pk)
+          : "";
+    var sel = selectedDeptPk && fid === selectedDeptPk;
+    var dim = !!selectedDeptPk;
     return {
-      color: "#00875a",
-      weight: 1,
+      color: sel ? "#007BFF" : "#00875a",
+      weight: sel ? 3 : 1,
       opacity: 1,
-      fillColor: "#00875a",
-      fillOpacity: 0.12,
+      fillColor: sel ? "#007BFF" : "#00875a",
+      fillOpacity: dim && !sel ? 0.3 : 0.12,
     };
   }
-  function hoverStyle() {
+
+  function departmentHoverStyle(feature) {
+    var fid =
+      feature.id != null && feature.id !== ""
+        ? String(feature.id)
+        : feature.properties && feature.properties.pk != null
+          ? String(feature.properties.pk)
+          : "";
+    var sel = selectedDeptPk && fid === selectedDeptPk;
+    if (sel) {
+      return {
+        color: "#007BFF",
+        weight: 3,
+        opacity: 1,
+        fillColor: "#007BFF",
+        fillOpacity: 0.28,
+      };
+    }
     return {
       color: "#00875a",
       weight: 2,
@@ -696,6 +992,64 @@
       fillColor: "#00875a",
       fillOpacity: 0.22,
     };
+  }
+
+  function restyleDepartmentLayers() {
+    if (!adminDeptLayer) return;
+    adminDeptLayer.eachLayer(function (lyr) {
+      if (lyr.feature) lyr.setStyle(departmentStyleForFeature(lyr.feature));
+    });
+  }
+
+  function communeStyleForFeature(feature) {
+    var cid =
+      feature.id != null && feature.id !== ""
+        ? String(feature.id)
+        : feature.properties && feature.properties.pk != null
+          ? String(feature.properties.pk)
+          : "";
+    var sel = selectedCommunePk && cid === selectedCommunePk;
+    var dim = !!selectedCommunePk;
+    return {
+      color: sel ? "#007BFF" : "#00875a",
+      weight: sel ? 3 : 1,
+      opacity: 1,
+      fillColor: sel ? "#007BFF" : "#00875a",
+      fillOpacity: dim && !sel ? 0.3 : 0.1,
+    };
+  }
+
+  function communeHoverStyleForFeature(feature) {
+    var cid =
+      feature.id != null && feature.id !== ""
+        ? String(feature.id)
+        : feature.properties && feature.properties.pk != null
+          ? String(feature.properties.pk)
+          : "";
+    var sel = selectedCommunePk && cid === selectedCommunePk;
+    if (sel) {
+      return {
+        color: "#007BFF",
+        weight: 3,
+        opacity: 1,
+        fillColor: "#007BFF",
+        fillOpacity: 0.22,
+      };
+    }
+    return {
+      color: "#00875a",
+      weight: 2,
+      opacity: 1,
+      fillColor: "#00875a",
+      fillOpacity: 0.18,
+    };
+  }
+
+  function restyleCommuneLayers() {
+    if (!activeCommunesLayer) return;
+    activeCommunesLayer.eachLayer(function (lyr) {
+      if (lyr.feature) lyr.setStyle(communeStyleForFeature(lyr.feature));
+    });
   }
 
   function escapeHtml(s) {
@@ -815,10 +1169,66 @@
     };
   }
 
+  function zonePolyStyleForLandUse(feature) {
+    var p = (feature && feature.properties) || {};
+    if (p.kind === "quartier") return subZonePolyStyle();
+    var tz = String(p.type_zone || "").toLowerCase();
+    var act = window.__atlasLandUseActive || {
+      residential: true,
+      commercial: true,
+      green: true,
+    };
+    if (!tz) {
+      return {
+        color: "#BDBDBD",
+        weight: 1,
+        opacity: 0.35,
+        fillColor: "#E0E0E0",
+        fillOpacity: 0.06,
+      };
+    }
+    if (!act[tz]) {
+      return {
+        opacity: 0,
+        fillOpacity: 0,
+        weight: 0,
+        color: "transparent",
+        fillColor: "transparent",
+      };
+    }
+    if (tz === "residential") {
+      return {
+        color: "#D84315",
+        weight: 1,
+        opacity: 0.95,
+        fillColor: "#FF6B35",
+        fillOpacity: 0.44,
+      };
+    }
+    if (tz === "commercial") {
+      return {
+        color: "#1d4ed8",
+        weight: 1,
+        opacity: 0.95,
+        fillColor: "#3b82f6",
+        fillOpacity: 0.4,
+      };
+    }
+    if (tz === "green") {
+      return {
+        color: "#166534",
+        weight: 1,
+        opacity: 0.95,
+        fillColor: "#22c55e",
+        fillOpacity: 0.42,
+      };
+    }
+    return subZonePolyStyle();
+  }
+
   function poiIconForCategory(cat) {
     var c = (cat && String(cat).toLowerCase()) || "other";
-    var emerald = ["health", "education", "admin"];
-    var color = emerald.indexOf(c) >= 0 ? "#00875a" : "#a67c52";
+    var color = c === "health" ? "#50C878" : "#CD7F32";
     return L.divIcon({
       className: "illeto-poi-marker",
       html:
@@ -835,8 +1245,30 @@
     if (!cid) return;
     if (poiFetchAbort) poiFetchAbort.abort();
     poiFetchAbort = new AbortController();
-    var url =
-      "/geo/api/poi/geojson/?commune_id=" + encodeURIComponent(cid);
+    var t =
+      window.IlletoAtlas && typeof window.IlletoAtlas.getPoiToggles === "function"
+        ? window.IlletoAtlas.getPoiToggles()
+        : { market: false, health: false, transport: false };
+    var anyCat = !!(t.market || t.health || t.transport);
+    if (!anyCat) return;
+    var url = null;
+    if (window.IlletoAtlas && typeof window.IlletoAtlas.getPoiApiUrl === "function") {
+      url = window.IlletoAtlas.getPoiApiUrl(cid);
+    }
+    if (!url) {
+      var layerKey =
+        window.IlletoAtlas && typeof window.IlletoAtlas.getPoiDataset === "function"
+          ? window.IlletoAtlas.getPoiDataset()
+          : "existing";
+      url =
+        "/geo/api/poi/?commune_id=" +
+        encodeURIComponent(cid) +
+        "&layer=" +
+        encodeURIComponent(layerKey || "existing");
+      if (t.market) url += "&category=market";
+      if (t.health) url += "&category=health";
+      if (t.transport) url += "&category=transport";
+    }
     fetch(url, {
       credentials: "same-origin",
       signal: poiFetchAbort.signal,
@@ -847,23 +1279,7 @@
       })
       .then(function (gj) {
         if (!gj || !gj.features || !gj.features.length) return;
-        var t =
-          window.IlletoAtlas && typeof window.IlletoAtlas.getPoiToggles === "function"
-            ? window.IlletoAtlas.getPoiToggles()
-            : { market: false, health: false, transport: false };
-        function poiVisible(catRaw) {
-          var c = String(catRaw || "other").toLowerCase();
-          if (t.market && c === "market") return true;
-          if (t.health && c === "health") return true;
-          if (t.transport && c === "transport") return true;
-          return false;
-        }
-        var feats = (gj.features || []).filter(function (f) {
-          var cat = f.properties && f.properties.category;
-          return poiVisible(cat);
-        });
-        if (!feats.length) return;
-        var filteredGj = { type: "FeatureCollection", features: feats };
+        var filteredGj = { type: "FeatureCollection", features: gj.features || [] };
         var layer = L.geoJSON(filteredGj, {
           pointToLayer: function (feature, latlng) {
             var cat =
@@ -1164,6 +1580,24 @@
       });
   }
 
+  function restyleSubZonesFromLandUse() {
+    subZonesLayerGroup.eachLayer(function (lyr) {
+      if (lyr.eachLayer) {
+        lyr.eachLayer(function (sub) {
+          if (sub.feature) sub.setStyle(zonePolyStyleForLandUse(sub.feature));
+        });
+      }
+    });
+  }
+
+  window.addEventListener("illeto-atlas-landuse", function () {
+    restyleSubZonesFromLandUse();
+  });
+
+  window.addEventListener("illeto-atlas-poi-dataset", function () {
+    if (__lastPoiCommuneId) loadPoiForCommune(__lastPoiCommuneId);
+  });
+
   window.addEventListener("illeto-atlas-zones-geojson", function (ev) {
     var d = ev.detail || {};
     var gj = d.geojson;
@@ -1180,7 +1614,7 @@
     subZonesLayerGroup.clearLayers();
     if (!gj || !gj.features || !gj.features.length) return;
     var zl = L.geoJSON(gj, {
-      style: subZonePolyStyle,
+      style: zonePolyStyleForLandUse,
       onEachFeature: function (feature, lyr) {
         var n =
           feature.properties && feature.properties.name
@@ -1232,25 +1666,6 @@
     updateFloodRiskFromCommuneId(cidH);
   });
 
-  function communePolygonStyle() {
-    return {
-      color: "#00875a",
-      weight: 1,
-      opacity: 1,
-      fillColor: "#00875a",
-      fillOpacity: 0.1,
-    };
-  }
-  function communePolygonHoverStyle() {
-    return {
-      color: "#00875a",
-      weight: 2,
-      opacity: 1,
-      fillColor: "#00875a",
-      fillOpacity: 0.18,
-    };
-  }
-
   function loadCommunesForDepartment(deptId) {
     if (communesFetchController) communesFetchController.abort();
     communesLayerGroup.clearLayers();
@@ -1281,7 +1696,7 @@
         }
         if (!feats.length) return;
         var subLayer = L.geoJSON(geojson, {
-          style: communePolygonStyle,
+          style: communeStyleForFeature,
           onEachFeature: function (feature, lyr) {
             var cn =
               feature.properties && feature.properties.name
@@ -1300,11 +1715,12 @@
             lyr.on({
               mouseover: function (e) {
                 var t = e.target;
-                t.setStyle(communePolygonHoverStyle());
+                if (feature) t.setStyle(communeHoverStyleForFeature(feature));
                 if (!L.Browser.ie && !L.Browser.opera) t.bringToFront();
               },
               mouseout: function (e) {
-                subLayer.resetStyle(e.target);
+                var t = e.target;
+                if (feature) t.setStyle(communeStyleForFeature(feature));
               },
               click: function (e) {
                 if (e.originalEvent) {
@@ -1326,6 +1742,8 @@
           },
         });
         communesLayerGroup.addLayer(subLayer);
+        activeCommunesLayer = subLayer;
+        restyleCommuneLayers();
         var b = communesLayerGroup.getBounds();
         if (b && typeof b.isValid === "function" && b.isValid()) {
           map.fitBounds(b, { padding: [28, 28], maxZoom: 12, animate: true });
@@ -1339,6 +1757,10 @@
 
   window.addEventListener("illeto-atlas-department", function (ev) {
     var id = ev.detail && ev.detail.departmentId;
+    selectedDeptPk = id != null && id !== "" ? String(id) : "";
+    selectedCommunePk = "";
+    activeCommunesLayer = null;
+    restyleDepartmentLayers();
     loadCommunesForDepartment(id);
     var g = id != null ? deptGeometries[String(id)] : null;
     updateExportPreviewFromGeometry(g || null, "Aperçu département");
@@ -1362,6 +1784,9 @@
       d.communeId != null && d.communeId !== ""
         ? String(d.communeId)
         : "";
+    selectedCommunePk = cid;
+    restyleCommuneLayers();
+    restyleDepartmentLayers();
     __lastPoiCommuneId = cid;
     if (!cid) {
       poiLayerGroup.clearLayers();
@@ -1417,7 +1842,7 @@
       }
 
       var geoLayer = L.geoJSON(data, {
-        style: baseStyle,
+        style: departmentStyleForFeature,
         onEachFeature: function (feature, layer) {
           var name =
             feature.properties && feature.properties.name
@@ -1436,11 +1861,12 @@
           layer.on({
             mouseover: function (e) {
               var t = e.target;
-              t.setStyle(hoverStyle());
+              if (feature) t.setStyle(departmentHoverStyle(feature));
               if (!L.Browser.ie && !L.Browser.opera) t.bringToFront();
             },
             mouseout: function (e) {
-              geoLayer.resetStyle(e.target);
+              var t = e.target;
+              if (feature) t.setStyle(departmentStyleForFeature(feature));
             },
             click: function (e) {
               if (e.originalEvent) {
@@ -1634,6 +2060,31 @@
     }, 3200);
   }
 
+  function atlasServerExportParams(st) {
+    st = st || {};
+    var subId =
+      st.neighborhood != null && st.neighborhood !== ""
+        ? String(st.neighborhood)
+        : "";
+    if (subId) {
+      var k = (st.neighborhoodKind || "quartier").toLowerCase();
+      return {
+        territory_type: k === "zone" ? "zone" : "quartier",
+        territory_id: subId,
+      };
+    }
+    if (st.communeId) {
+      return { territory_type: "commune", territory_id: String(st.communeId) };
+    }
+    if (st.departmentId) {
+      return {
+        territory_type: "departement",
+        territory_id: String(st.departmentId),
+      };
+    }
+    return null;
+  }
+
   function bindAtlasExportDownload() {
     var btn = document.getElementById("export-download-btn");
     var spin = document.getElementById("export-download-spinner");
@@ -1704,6 +2155,63 @@
           : st.departmentName || "territoire");
 
       try {
+        if (fmt === "vector_kml" || fmt === "vector_csv") {
+          var prm = atlasServerExportParams(st);
+          if (!prm) {
+            showAtlasToast(
+              "Sélectionnez au moins un département, une commune ou une zone / quartier."
+            );
+            doneUnlock();
+            return;
+          }
+          var extFmt = fmt === "vector_kml" ? "kml" : "csv";
+          var u =
+            "/geo/api/export/territory/?format=" +
+            encodeURIComponent(extFmt) +
+            "&territory_type=" +
+            encodeURIComponent(prm.territory_type) +
+            "&territory_id=" +
+            encodeURIComponent(prm.territory_id);
+          fetch(u, { credentials: "same-origin" })
+            .then(function (r) {
+              if (r.status === 400 || r.status === 404) {
+                return r
+                  .json()
+                  .catch(function () {
+                    return {};
+                  })
+                  .then(function (j) {
+                    showAtlasToast((j && j.detail) || "Export impossible.");
+                    throw new Error("abort");
+                  });
+              }
+              if (!r.ok) {
+                showAtlasToast("Erreur serveur (" + r.status + ").");
+                throw new Error("abort");
+              }
+              var cd = r.headers.get("Content-Disposition");
+              var fname =
+                filenameFromDisposition(cd) ||
+                ("illeto_export." + (extFmt === "kml" ? "kml" : "csv"));
+              return r.blob().then(function (blob) {
+                return { blob: blob, fname: fname };
+              });
+            })
+            .then(function (o) {
+              if (!o || !o.blob) return;
+              triggerDownloadBlob(o.blob, o.fname);
+              showAtlasToast(
+                extFmt === "kml" ? "Fichier KML téléchargé." : "CSV téléchargé."
+              );
+              doneUnlock();
+            })
+            .catch(function (e) {
+              if (e && e.message !== "abort") showAtlasToast("Export échoué.");
+              doneUnlock();
+            });
+          return;
+        }
+
         if (fmt === "vector_geojson" || fmt === "vector_shp") {
           var ut = st.userType || "PUBLIC";
           if (
@@ -1781,6 +2289,14 @@
                   doneUnlock();
                 }
               });
+            return;
+          }
+
+          if (fmt === "vector_shp") {
+            showAtlasToast(
+              "Export Shapefile natif (.zip) : compte professionnel requis. Utilisez CSV, KML ou GeoJSON."
+            );
+            doneUnlock();
             return;
           }
 
@@ -2029,9 +2545,13 @@
         var t = e.target.closest("[data-extra-layer]");
         if (!t) return;
         e.stopPropagation();
-        t.classList.toggle("border-primary/50");
-        t.classList.toggle("text-primary");
-        t.classList.toggle("bg-primary/10");
+        var name = t.getAttribute("data-extra-layer");
+        if (!name) return;
+        var turningOn = !extraActive[name];
+        if (!setExtraLayer(name, turningOn)) return;
+        t.classList.toggle("border-primary/50", turningOn);
+        t.classList.toggle("text-primary", turningOn);
+        t.classList.toggle("bg-primary/10", turningOn);
       });
     }
   }
@@ -2102,6 +2622,14 @@
     bindAtlasExportDownload();
     initAtlasFlyouts();
     initPaymentModal();
+    var themeBtn = document.getElementById("atlas-map-theme-toggle");
+    if (themeBtn) {
+      themeBtn.addEventListener("click", function () {
+        toggleAtlasMapTheme();
+        if (window.lucide) window.lucide.createIcons();
+      });
+    }
+    updateMapThemeToggleUI();
     if (window.lucide) window.lucide.createIcons();
   }
   if (document.readyState === "loading") {

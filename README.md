@@ -80,6 +80,6 @@ Chaque action d'importation est tracée dans le modèle `ImportLog`. Vous pouvez
 
 Propriété exclusive de Innocent Kpade. Tous droits réservés.
 
-## 💡 Note pour le développement
+## 💡 Note 
 
 Pour toute modification massive de la structure géographique, utilisez toujours la commande `python manage.py flush` avant de réimporter les fichiers ADM pour éviter les doublons de PCodes.

@@ -869,6 +869,31 @@
     getPoiDataset: function () {
       return atlasState.poiDataset || "existing";
     },
+    /**
+     * URL POI Atlas V2.4 : commune_id + layer (existing|offer|discovery) + categories actives.
+     */
+    getPoiApiUrl: function (communeId) {
+      var cid =
+        communeId != null && communeId !== "" ? String(communeId) : "";
+      if (!cid) return null;
+      var toggles = this.getPoiToggles();
+      if (!(toggles.market || toggles.health || toggles.transport)) {
+        return null;
+      }
+      var layer = String(atlasState.poiDataset || "existing").toLowerCase();
+      if (layer !== "offer" && layer !== "discovery") {
+        layer = "existing";
+      }
+      var url =
+        "/geo/api/poi/?commune_id=" +
+        encodeURIComponent(cid) +
+        "&layer=" +
+        encodeURIComponent(layer);
+      if (toggles.market) url += "&category=market";
+      if (toggles.health) url += "&category=health";
+      if (toggles.transport) url += "&category=transport";
+      return url;
+    },
     showPoi: function (key) {
       if (!atlasState.poiToggles.hasOwnProperty(key)) return;
       atlasState.poiToggles[key] = true;

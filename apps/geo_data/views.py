@@ -156,6 +156,8 @@ def zones_geojson_by_commune(request):
     """
     Zones (admin_level 8) et quartiers (admin_level 10) pour une commune.
     GET: commune_id=<pk>
+    Chaque zone expose ``properties.type_zone`` (résidentiel / commercial / espace vert)
+    pour le coloriage côté Atlas (V2.4).
     """
     raw = request.GET.get("commune_id")
     if raw is None or str(raw).strip() == "":
@@ -382,6 +384,8 @@ def export_territory_geo_data(request):
     """
     Export CSV ou KML pour un territoire (département, commune, zone, quartier).
     GET: format=csv|kml, territory_type=…, territory_id=<pk>
+    CSV : colonnes incluant **WKT** (géométrie EPSG:4326) pour interop SIG.
+    Les formats shapefile via ce endpoint renvoient 403 si compte non pro.
     """
     fmt = (request.GET.get("format") or "").strip().lower()
     tt = request.GET.get("territory_type") or request.GET.get("type")
@@ -413,10 +417,37 @@ def export_territory_geo_data(request):
     slug = slugify(name)[:50] or "territoire"
     cen = geom.centroid
 
+    if fmt in ("shp", "shapefile", "esri", "esri_shapefile", "zip_shp"):
+        if not request.user.is_authenticated:
+            return JsonResponse(
+                {"detail": "Authentification requise pour l’export Shapefile."},
+                status=401,
+            )
+        ut = getattr(request.user, "user_type", None)
+        if ut not in (User.UserType.PROFESSIONAL, User.UserType.INSTITUTION):
+            return JsonResponse(
+                {
+                    "detail": (
+                        "L’export Shapefile (.zip) est réservé aux comptes professionnels ou "
+                        "institutionnels. Passez au grade supérieur pour débloquer cette fonctionnalité."
+                    )
+                },
+                status=403,
+            )
+        return JsonResponse(
+            {
+                "detail": (
+                    "Utilisez l’endpoint dédié : "
+                    "/geo/api/export/shapefile/<territory_type>/<territory_id>/"
+                )
+            },
+            status=400,
+        )
+
     if fmt == "csv":
         buf = io.StringIO()
         w = csv.writer(buf)
-        w.writerow(["name", "kind", "lon", "lat", "wkt"])
+        w.writerow(["name", "kind", "lon", "lat", "WKT"])
         w.writerow([name, kind, f"{cen.x:.6f}", f"{cen.y:.6f}", geom.wkt])
         resp = HttpResponse(
             "\ufeff" + buf.getvalue(),
@@ -462,7 +493,12 @@ def export_shapefile_view(request, territory_type, territory_id):
     ut = getattr(request.user, "user_type", None)
     if ut not in (User.UserType.PROFESSIONAL, User.UserType.INSTITUTION):
         return JsonResponse(
-            {"detail": "Export Shapefile réservé aux comptes professionnels."},
+            {
+                "detail": (
+                    "L’export Shapefile (.zip) est réservé aux comptes professionnels ou "
+                    "institutionnels. Passez au grade supérieur pour débloquer cette fonctionnalité."
+                )
+            },
             status=403,
         )
 

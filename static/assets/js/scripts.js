@@ -226,6 +226,7 @@
     neighborhoodName: "",
     neighborhoodKind: null,
     systemUtilisateur: "Existant",
+    poiDataset: "existing",
     landUse: ["residential", "commercial"],
     exportSelection: null,
     exportFormat: "image_png",
@@ -235,6 +236,19 @@
       transport: false,
     },
   };
+
+  function syncAtlasLandUseGlobal() {
+    window.__atlasLandUseActive = {
+      residential: atlasState.landUse.indexOf("residential") >= 0,
+      commercial: atlasState.landUse.indexOf("commercial") >= 0,
+      green: atlasState.landUse.indexOf("green") >= 0,
+    };
+    try {
+      window.dispatchEvent(new CustomEvent("illeto-atlas-landuse"));
+    } catch (e) {
+      /* */
+    }
+  }
 
   function escapeChipText(s) {
     var d = document.createElement("div");
@@ -328,6 +342,14 @@
     if (sysVal) {
       sysVal.textContent = atlasState.systemUtilisateur || "—";
     }
+    qsa("[data-atlas-poi-dataset]").forEach(function (b) {
+      var v = b.getAttribute("data-atlas-poi-dataset");
+      var on = v && v === (atlasState.poiDataset || "existing");
+      b.classList.toggle("ring-2", on);
+      b.classList.toggle("ring-[#00875a]/55", on);
+      b.classList.toggle("bg-[#00875a]/15", on);
+      b.classList.toggle("border-[#00875a]/45", on);
+    });
 
     if (simEl) {
       if (dname) {
@@ -623,6 +645,14 @@
     }
   }
 
+  function notifyPoiDatasetChanged() {
+    try {
+      window.dispatchEvent(new CustomEvent("illeto-atlas-poi-dataset"));
+    } catch (e) {
+      /* */
+    }
+  }
+
   function selectTerritory(type, id, data) {
     data = data || {};
     var idStr = id != null && id !== "" ? String(id) : "";
@@ -666,6 +696,23 @@
         /* */
       }
       updateAtlasDataPanel();
+      if (idStr && !isNaN(parseInt(idStr, 10))) {
+        try {
+          var csrfM = document.cookie.match(/csrftoken=([^;]+)/);
+          var csrf = csrfM ? decodeURIComponent(csrfM[1].trim()) : "";
+          fetch("/auth/api/commune-log/", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": csrf,
+            },
+            body: JSON.stringify({ commune_id: parseInt(idStr, 10) }),
+          }).catch(function () {});
+        } catch (e) {
+          /* */
+        }
+      }
       return;
     }
 
@@ -819,6 +866,34 @@
         transport: !!atlasState.poiToggles.transport,
       };
     },
+    getPoiDataset: function () {
+      return atlasState.poiDataset || "existing";
+    },
+    /**
+     * URL POI Atlas V2.4 : commune_id + layer (existing|offer|discovery) + categories actives.
+     */
+    getPoiApiUrl: function (communeId) {
+      var cid =
+        communeId != null && communeId !== "" ? String(communeId) : "";
+      if (!cid) return null;
+      var toggles = this.getPoiToggles();
+      if (!(toggles.market || toggles.health || toggles.transport)) {
+        return null;
+      }
+      var layer = String(atlasState.poiDataset || "existing").toLowerCase();
+      if (layer !== "offer" && layer !== "discovery") {
+        layer = "existing";
+      }
+      var url =
+        "/geo/api/poi/?commune_id=" +
+        encodeURIComponent(cid) +
+        "&layer=" +
+        encodeURIComponent(layer);
+      if (toggles.market) url += "&category=market";
+      if (toggles.health) url += "&category=health";
+      if (toggles.transport) url += "&category=transport";
+      return url;
+    },
     showPoi: function (key) {
       if (!atlasState.poiToggles.hasOwnProperty(key)) return;
       atlasState.poiToggles[key] = true;
@@ -847,6 +922,7 @@
         exportFormat: atlasState.exportFormat,
         landUse: atlasState.landUse.slice(),
         systemUtilisateur: atlasState.systemUtilisateur,
+        poiDataset: atlasState.poiDataset || "existing",
         poiToggles: {
           market: !!atlasState.poiToggles.market,
           health: !!atlasState.poiToggles.health,
@@ -945,10 +1021,25 @@
         b.classList.toggle("border-glass-border", !on);
         var dot = qs("[data-landuse-dot]", b);
         if (dot) dot.classList.toggle("hidden", !on);
+        syncAtlasLandUseGlobal();
         updateRightExportPanel();
       });
     });
 
+    qsa("[data-atlas-poi-dataset]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var v = btn.getAttribute("data-atlas-poi-dataset");
+        if (!v) return;
+        atlasState.poiDataset = v;
+        if (v === "existing") atlasState.systemUtilisateur = "Existant";
+        else if (v === "offer") atlasState.systemUtilisateur = "Offre";
+        else if (v === "discovery") atlasState.systemUtilisateur = "Découverte";
+        updateRightExportPanel();
+        notifyPoiDatasetChanged();
+      });
+    });
+
+    syncAtlasLandUseGlobal();
     updateAtlasDataPanel();
   }
 
