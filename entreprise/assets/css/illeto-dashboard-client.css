@@ -1,0 +1,213 @@
+/* Client dashboard branding (Illeto) */
+:root{
+  --illeto-bg: #03050c;
+  --illeto-surface: rgba(8, 13, 24, 0.65);
+  --illeto-surface-2: rgba(8, 13, 24, 0.45);
+  --illeto-border: rgba(255, 255, 255, 0.08);
+  --illeto-border-2: rgba(45, 212, 191, 0.22);
+  --illeto-text: rgba(255, 255, 255, 0.92);
+  --illeto-muted: rgba(148, 163, 184, 0.74);
+  --illeto-teal: #2dd4bf;
+  --illeto-teal-soft: rgba(45, 212, 191, 0.20);
+  --illeto-teal-soft-2: rgba(45, 212, 191, 0.12);
+}
+
+body{
+  background:
+    radial-gradient(ellipse 20% 50% at 100% 20%, rgba(45, 212, 191, 0.18) 0%, transparent 62%),
+    var(--illeto-bg) !important;
+  color: var(--illeto-text) !important;
+}
+
+/* Topbar / sidebar */
+.topbar{
+  background: rgba(3, 5, 12, 0.72) !important;
+  backdrop-filter: blur(10px);
+  border-bottom-color: var(--illeto-border) !important;
+}
+
+#sidebar.sidebar{
+  background: linear-gradient(180deg, rgba(8, 13, 24, 0.98), rgba(3, 5, 12, 0.98)) !important;
+  border-right: 1px solid var(--illeto-border);
+}
+
+.sidebar .nav-link{
+  color: var(--illeto-muted) !important;
+  border-radius: 14px;
+  margin: 6px 10px;
+  padding: 10px 12px;
+}
+.sidebar .nav-link i{
+  opacity: 0.95;
+}
+.sidebar .nav-link.active{
+  background: linear-gradient(180deg, rgba(45, 212, 191, 0.18), rgba(45, 212, 191, 0.10));
+  border: 1px solid var(--illeto-border-2);
+  color: rgba(45, 212, 191, 0.95) !important;
+}
+
+.nav-text{
+  color: inherit;
+}
+
+/* Cards + text */
+.illeto-card{
+  background: linear-gradient(180deg, rgba(8, 13, 24, 0.62), rgba(3, 5, 12, 0.52)) !important;
+  border: 1px solid var(--illeto-border) !important;
+  border-radius: 18px !important;
+}
+.illeto-muted{
+  color: var(--illeto-muted) !important;
+}
+.illeto-pill{
+  background: var(--illeto-teal-soft-2);
+  border: 1px solid rgba(45, 212, 191, 0.18);
+  color: rgba(45, 212, 191, 0.95);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+/* Buttons */
+.btn-primary{
+  background: rgba(45, 212, 191, 0.20) !important;
+  border-color: rgba(45, 212, 191, 0.28) !important;
+  color: rgba(235, 254, 250, 0.96) !important;
+}
+.btn-primary:hover{
+  background: rgba(45, 212, 191, 0.26) !important;
+}
+.btn-outline-secondary{
+  border-color: var(--illeto-border) !important;
+  color: rgba(255, 255, 255, 0.86) !important;
+  border-radius: 10px !important;
+}
+.btn-outline-secondary:hover{
+  background: rgba(45, 212, 191, 0.30) !important;
+  color: white !important;
+}
+
+/* Inputs */
+.form-control, select.form-select{
+  background: rgba(255,255,255,0.03) !important;
+  border-color: rgba(255,255,255,0.12) !important;
+  color: var(--illeto-text) !important;
+}
+.form-control:focus, select.form-select:focus{
+  border-color: rgba(45, 212, 191, 0.48) !important;
+  box-shadow: 0 0 0 .25rem rgba(45, 212, 191, 0.14) !important;
+}
+
+/* Atlas CTA */
+.illeto-big-cta{
+  width: 100%;
+  border-radius: 16px !important;
+  padding: 16px 18px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.illeto-big-cta i{
+  font-size: 1.15rem;
+}
+
+/* Cart / store cart bar */
+.illeto-cartbar{
+  position: sticky;
+  bottom: 14px;
+  z-index: 50;
+  background: rgba(3, 5, 12, 0.78);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--illeto-border);
+  border-radius: 18px;
+}
+
+/* Modal (simple, no bootstrap dependency) */
+.illeto-modal{
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+.illeto-modal.is-open{
+  display: flex;
+}
+.illeto-modal__backdrop{
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+}
+.illeto-modal__panel{
+  position: relative;
+  width: min(720px, calc(100% - 24px));
+  background: linear-gradient(180deg, rgba(8, 13, 24, 0.96), rgba(3, 5, 12, 0.96));
+  border: 1px solid var(--illeto-border);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 18px 70px rgba(0,0,0,0.55);
+}
+
+.illeto-modal__title{
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  margin-bottom: 8px;
+}
+
+.illeto-table{
+  border-color: var(--illeto-border) !important;
+}
+.illeto-table th{
+  color: rgba(255,255,255,0.72) !important;
+  font-weight: 700;
+  border-color: rgba(255,255,255,0.08) !important;
+  background: transparent !important;
+}
+.illeto-table td{
+  background: transparent !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  color: rgba(255,255,255,0.90) !important;
+}
+
+/* Store payment methods */
+.illeto-modal [data-payment-method].active{
+  background: rgba(45, 212, 191, 0.22) !important;
+  border-color: rgba(45, 212, 191, 0.30) !important;
+  color: rgba(235, 254, 250, 0.96) !important;
+}
+
+/* Sidebar bottom block: name + plan */
+.sidebar .illeto-userbox{
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 14px;
+  padding: 12px 12px 14px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  background: rgba(3, 5, 12, 0.42);
+  backdrop-filter: blur(10px);
+  z-index: 3;
+}
+.sidebar .illeto-userbox__name{
+  font-weight: 950;
+  letter-spacing: 0.01em;
+  color: rgba(255,255,255,0.92);
+}
+.sidebar .illeto-userbox__plan{
+  margin-top: 2px;
+  font-size: 12px;
+  color: rgba(148, 163, 184, 0.74);
+}
+.sidebar.collapsed .illeto-userbox{
+  padding: 10px 10px 12px;
+}
+.sidebar.collapsed .illeto-userbox__name,
+.sidebar.collapsed .illeto-userbox__plan{
+  display: none;
+}
+

@@ -1,0 +1,76 @@
+{% extends "layouts/dashboard_base.html" %}
+{% load static %}
+{% block dashboard_title %}Ma Cartothèque - Illeto{% endblock %}
+{% block dashboard_content %}
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="d-flex justify-content-between align-items-center mb-4 gap-3 flex-wrap">
+            <div>
+              <h1 class="fs-3 mb-1" style="font-weight: 950;">Ma Cartothèque</h1>
+              <p class="mb-0 illeto-muted">Exports Shapefile ZIP enregistrés. Retéléchargez le même périmètre (commune, zone ou quartier).</p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+              <a class="btn btn-outline-secondary" href="{% url 'accounts:dashboard_reports' %}">
+                <i class="ti ti-file-export me-2"></i> Rapports &amp; API
+              </a>
+              <button class="btn btn-outline-secondary" type="button" onclick="window.location='{% url "accounts:dashboard_store" %}'">
+                <i class="ti ti-shopping-bag me-2"></i> Acheter
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        {% for entry in library_entries %}
+        <div class="col-12 col-md-6 col-xl-4">
+          <div class="card illeto-card h-100">
+            <div class="card-body p-4">
+              <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                <div>
+                  <div class="illeto-muted small text-uppercase" style="font-weight: 900; letter-spacing: 0.04em;">{{ entry.territory_type }}</div>
+                  <div style="font-weight: 1000; font-size: 1.1rem; margin-top: 4px;">{{ entry.label }}</div>
+                  <div class="small illeto-muted mt-2">{{ entry.created_at|date:"d/m/Y H:i" }}</div>
+                </div>
+                <a class="btn btn-primary btn-sm" href="/geo/api/export/shapefile/{{ entry.territory_type }}/{{ entry.territory_id }}/">
+                  <i class="ti ti-download me-1"></i> ZIP Shapefile
+                </a>
+              </div>
+              <div class="mt-3 d-flex gap-2 flex-wrap">
+                <span class="illeto-pill">Bibliothèque</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+          <div class="card illeto-card">
+            <div class="card-body p-4 illeto-muted">
+              Aucun export Shapefile enregistré. Lancez un export depuis <a href="{% url 'website:atlas' %}" class="link-light text-decoration-underline">l’atlas</a> ou consultez la <a href="{% url 'accounts:dashboard_reports' %}" class="link-light text-decoration-underline">documentation API</a>.
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="card illeto-card">
+            <div class="card-body p-4">
+              <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                <div>
+                  <div style="font-weight: 1000; font-size: 1.1rem;">Besoin d’un autre territoire ?</div>
+                  <div class="illeto-muted small" style="margin-top: 4px;">Les nouveaux exports apparaissent ici automatiquement après téléchargement.</div>
+                </div>
+                <a class="btn btn-primary illeto-big-cta" style="max-width: 320px;" href="{% url 'accounts:dashboard_store' %}">
+                  <i class="ti ti-plus me-2"></i>Ajouter de nouvelles données
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+{% endblock %}

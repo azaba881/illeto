@@ -1,0 +1,186 @@
+{% extends "layouts/dashboard_base.html" %}
+{% load static %}
+{% block dashboard_title %}Rapports &amp; exports — IlèTô{% endblock %}
+{% block dashboard_content %}
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="d-flex justify-content-between align-items-center mb-4 gap-3 flex-wrap">
+            <div>
+              <h1 class="fs-3 mb-1" style="font-weight: 950;">Rapports &amp; export Shapefile</h1>
+              <p class="mb-0 illeto-muted">
+                Téléchargement binaire ZIP (ESRI Shapefile) généré côté serveur — même moteur que l’atlas.
+              </p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+              <a class="btn btn-outline-secondary" href="{% url 'accounts:dashboard_library' %}">
+                <i class="ti ti-folders me-2"></i> Ma bibliothèque
+              </a>
+              <a class="btn btn-primary" href="{{ atlas_url }}">
+                <i class="ti ti-map me-2"></i> Ouvrir l’Atlas
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-4">
+        <div class="col-12 col-lg-5">
+          <div class="card illeto-card h-100">
+            <div class="card-body p-4">
+              <h2 class="fs-5 mb-2" style="font-weight: 900;">Rapport territorial (synthèse)</h2>
+              <p class="small illeto-muted mb-3">
+                Enregistre une ligne de synthèse pour la commune choisie. Le pourcentage d’aléa inondation provient du
+                <strong>moteur PostGIS</strong> (intersection commune × couches <code class="text-light">HydroZone</code>) lorsque des données hydro sont chargées ; sinon repli heuristique documenté.
+              </p>
+              <form method="post" action="{% url 'accounts:dashboard_reports' %}" class="row g-2 align-items-end">
+                {% csrf_token %}
+                <div class="col-12">
+                  <label class="small illeto-muted fw-bold d-block mb-1">Commune</label>
+                  <select name="commune_id" class="form-select" required>
+                    <option value="" {% if not default_report_commune_id %}selected{% endif %}>— Choisir —</option>
+                    {% for c in report_commune_choices %}
+                      <option value="{{ c.pk }}" {% if default_report_commune_id == c.pk %}selected{% endif %}>
+                        {{ c.departement.name }} — {{ c.name }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-12">
+                  <button type="submit" class="btn btn-primary w-100">
+                    <i class="ti ti-file-plus me-1"></i> Générer et enregistrer
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-lg-7">
+          <div class="card illeto-card h-100">
+            <div class="card-body p-4">
+              <h2 class="fs-5 mb-2" style="font-weight: 900;">Rapports générés</h2>
+              {% if generated_reports %}
+              <div class="table-responsive">
+                <table class="table illeto-table align-middle mb-0 small">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Commune</th>
+                      <th class="text-end">Pop. est.</th>
+                      <th class="text-end">Quartiers</th>
+                      <th class="text-end">Zone inond. %</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for r in generated_reports %}
+                    <tr>
+                      <td class="illeto-muted">{{ r.created_at|date:"d/m/Y H:i" }}</td>
+                      <td>{{ r.commune.departement.name }} — {{ r.commune.name }}</td>
+                      <td class="text-end">{{ r.population_est }}</td>
+                      <td class="text-end">{{ r.quartiers_count }}</td>
+                      <td class="text-end">{{ r.flood_zone_percent }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              {% else %}
+              <p class="small illeto-muted mb-0">Aucun rapport enregistré pour l’instant.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-4">
+        <div class="col-12 col-lg-7">
+          <div class="card illeto-card h-100">
+            <div class="card-body p-4">
+              <h2 class="fs-5 mb-2" style="font-weight: 900;">Endpoint HTTP</h2>
+              <p class="small illeto-muted mb-3">
+                Requête <strong>GET</strong> authentifiée (session). Types acceptés&nbsp;:
+                <code class="text-light">commune</code>,
+                <code class="text-light">zone</code>,
+                <code class="text-light">quartier</code> — l’identifiant est la clé primaire Django du territoire.
+              </p>
+              <pre class="p-3 rounded mb-0" style="background: rgba(0,0,0,0.35); font-size: 0.85rem; overflow-x: auto;">{{ shapefile_api_pattern }}</pre>
+              <p class="small illeto-muted mt-3 mb-0">
+                Exemple résolu{% if default_report_commune_id %} (votre périmètre actif){% endif %}&nbsp;:
+                {% if default_report_commune_id %}
+                <code class="text-light">{% url 'geo_data:api_export_shapefile' 'commune' default_report_commune_id %}</code>
+                {% else %}
+                <code class="text-light">/geo/api/export/shapefile/commune/&lt;id&gt;/</code>
+                {% endif %}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-lg-5">
+          <div class="card illeto-card h-100">
+            <div class="card-body p-4">
+              <h2 class="fs-5 mb-2" style="font-weight: 900;">Tester un export</h2>
+              <p class="small illeto-muted mb-3">
+                Saisissez un type et un ID connus (depuis l’URL ou les filtres de l’atlas), puis lancez le téléchargement.
+              </p>
+              <div class="row g-2 align-items-end">
+                <div class="col-12 col-sm-5">
+                  <label class="small illeto-muted fw-bold d-block mb-1">Type</label>
+                  <select id="illeto-sf-type" class="form-select">
+                    <option value="commune">commune</option>
+                    <option value="zone">zone</option>
+                    <option value="quartier">quartier</option>
+                  </select>
+                </div>
+                <div class="col-12 col-sm-4">
+                  <label class="small illeto-muted fw-bold d-block mb-1">ID</label>
+                  <input id="illeto-sf-id" type="number" min="1" class="form-control" placeholder="ex. 12" />
+                </div>
+                <div class="col-12 col-sm-3">
+                  <button type="button" class="btn btn-primary w-100" id="illeto-sf-go">
+                    <i class="ti ti-download me-1"></i> ZIP
+                  </button>
+                </div>
+              </div>
+              <p class="small mt-3 mb-0" style="color: rgba(148,163,184,0.85);" id="illeto-sf-msg"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-12">
+          <div class="card illeto-card">
+            <div class="card-body p-4">
+              <h2 class="fs-6 mb-2" style="font-weight: 900;">Comportement</h2>
+              <ul class="small illeto-muted mb-0 ps-3">
+                <li>Réponse <code class="text-light">application/zip</code> avec les fichiers Shapefile standards.</li>
+                <li>Chaque export réussi enregistre une entrée dans <strong>Mes documents</strong> (bibliothèque).</li>
+                <li>Réservé aux comptes <strong>Professionnel</strong> et <strong>Institution</strong>.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        var btn = document.getElementById("illeto-sf-go");
+        var typ = document.getElementById("illeto-sf-type");
+        var idIn = document.getElementById("illeto-sf-id");
+        var msg = document.getElementById("illeto-sf-msg");
+        if (!btn || !typ || !idIn) return;
+        btn.addEventListener("click", function () {
+          var t = (typ.value || "commune").trim().toLowerCase();
+          var id = (idIn.value || "").trim();
+          msg.textContent = "";
+          if (!id || isNaN(parseInt(id, 10))) {
+            msg.textContent = "Indiquez un identifiant numérique valide.";
+            return;
+          }
+          var url = "/geo/api/export/shapefile/" + encodeURIComponent(t) + "/" + encodeURIComponent(id) + "/";
+          window.location.href = url;
+        });
+      })();
+    </script>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends "layouts/dashboard_base.html" %}
+{% load static %}
+{% block dashboard_title %}Paramètres - Illeto{% endblock %}
+{% block dashboard_content %}
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="d-flex justify-content-between align-items-center mb-4 gap-3 flex-wrap">
+            <div>
+              <h1 class="fs-3 mb-1" style="font-weight: 950;">Paramètres</h1>
+              <p class="mb-0 illeto-muted">Mettez à jour vos informations et changez votre mot de passe.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-12 col-lg-7">
+          <div class="card illeto-card h-100">
+            <div class="card-body p-4">
+              <h2 style="font-weight: 1000; font-size: 1.15rem; margin-bottom: 6px;">Profil</h2>
+              <div class="small illeto-muted" style="margin-bottom: 18px;">
+                Ces informations servent à personnaliser votre espace client.
+              </div>
+
+              <form id="illetoProfileForm" action="#" method="post" class="space-y-4">
+                <div class="row g-3">
+                  <div class="col-12 col-md-6">
+                    <label class="small illeto-muted fw-bold">Nom complet</label>
+                    <input type="text" class="form-control" name="fullName" value="Jean Dupont" autocomplete="name" required />
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <label class="small illeto-muted fw-bold">Téléphone</label>
+                    <input type="tel" class="form-control" name="phone" value="+229 00 00 00 00" autocomplete="tel" />
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <label class="small illeto-muted fw-bold">Email</label>
+                    <input type="email" class="form-control" name="email" value="jean@exemple.bj" autocomplete="email" required />
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <label class="small illeto-muted fw-bold">Organisation</label>
+                    <input type="text" class="form-control" name="org" value="Cabinet Illeto" autocomplete="organization" />
+                  </div>
+                </div>
+
+                <div class="mt-4 d-flex gap-2 flex-wrap justify-content-end">
+                  <button id="illetoProfileSubmit" class="btn btn-primary" type="submit">
+                    Enregistrer
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-5">
+          <div class="card illeto-card h-100">
+            <div class="card-body p-4">
+              <h2 style="font-weight: 1000; font-size: 1.15rem; margin-bottom: 6px;">Mot de passe</h2>
+              <div class="small illeto-muted" style="margin-bottom: 18px;">
+                Pour votre sécurité, utilisez un mot de passe robuste.
+              </div>
+
+              <form id="illetoChangePasswordForm" action="#" method="post" class="space-y-4">
+                <div>
+                  <label class="small illeto-muted fw-bold">Mot de passe actuel</label>
+                  <input id="illetoCurrentPassword" type="password" class="form-control" name="currentPassword" required
+                    autocomplete="current-password" />
+                </div>
+                <div>
+                  <label class="small illeto-muted fw-bold">Nouveau mot de passe</label>
+                  <input id="illetoNewPassword" type="password" class="form-control" name="newPassword" required
+                    autocomplete="new-password" />
+                </div>
+                <div>
+                  <label class="small illeto-muted fw-bold">Confirmer</label>
+                  <input id="illetoNewPasswordConfirm" type="password" class="form-control" name="confirmPassword" required
+                    autocomplete="new-password" />
+                </div>
+
+                <div class="mt-4 d-flex gap-2 flex-wrap justify-content-end">
+                  <button id="illetoPasswordSubmit" class="btn btn-primary" type="submit">
+                    Mettre à jour
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="text-center py-4 text-secondary">
+        <p class="mb-0" style="color: rgba(148,163,184,0.74) !important;">
+          © 2026 Illeto. Votre atlas, votre décision.
+        </p>
+      </footer>
+    </div>
+{% endblock %}

@@ -1,0 +1,212 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+{% block title %}Illeto | Trouver une carte{% endblock %}
+{% block content %}
+    <main class="pt-28 pb-20">
+      <nav class="site-breadcrumb max-w-7xl mx-auto px-6 lg:px-8 mb-6" aria-label="Fil d'Ariane">
+        <ol class="flex flex-wrap items-center gap-2 text-xs font-mono text-muted-foreground/80">
+          <li><a href="{% url 'website:index' %}" class="hover:text-primary transition-colors">Accueil</a></li>
+          <li aria-hidden="true" class="text-muted-foreground/45">/</li>
+          <li class="text-foreground/90" aria-current="page">Trouver une carte</li>
+        </ol>
+      </nav>
+
+      <section class="max-w-7xl mx-auto px-6 lg:px-8 mb-12" aria-labelledby="cartes-catalog-title">
+        <div class="cartes-catalog-hero p-6 sm:p-8 lg:p-10">
+          <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 lg:gap-12">
+            <div class="flex-1 min-w-0">
+              <span class="text-xs font-mono tracking-widest text-primary uppercase mb-3 block">Catalogue de données</span>
+              <h1 id="cartes-catalog-title" class="font-serif text-4xl sm:text-5xl lg:text-6xl leading-tight mb-4">Trouver une <span class="italic text-accent">carte</span></h1>
+              <p class="max-w-xl text-sm sm:text-base text-muted-foreground leading-relaxed">Filtrez par famille de couches ou recherchez par mot-clé — même précision vectorielle que sur l’atlas.</p>
+            </div>
+            <div class="w-full lg:w-[min(100%,26rem)] shrink-0 space-y-4">
+              <label class="relative block">
+                <span class="sr-only">Rechercher une couche</span>
+                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/50 pointer-events-none" aria-hidden="true"></i>
+                <input type="search" id="cartes-catalog-search" class="cartes-catalog-search" placeholder="Ex. quartier, hydro, route…" autocomplete="off" />
+              </label>
+              <div class="flex flex-wrap gap-2" role="group" aria-label="Filtrer par type de couche">
+                <button type="button" class="cartes-filter-chip is-active" data-cartes-filter="all">Tout</button>
+                <button type="button" class="cartes-filter-chip" data-cartes-filter="admin">Admin.</button>
+                <button type="button" class="cartes-filter-chip" data-cartes-filter="hydro">Eau</button>
+                <button type="button" class="cartes-filter-chip" data-cartes-filter="infra">Bâti</button>
+                <button type="button" class="cartes-filter-chip" data-cartes-filter="sols">Sols</button>
+                <button type="button" class="cartes-filter-chip" data-cartes-filter="energie">Énergie</button>
+                <button type="button" class="cartes-filter-chip" data-cartes-filter="routes">Routes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div id="cartes-catalog-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- administrative -->
+          <div data-carte-layer data-carte-cat="admin" data-layer-color="#00875A" class="group relative glass-panel rounded-2xl overflow-hidden card-lift cursor-pointer">
+            <div class="relative h-36 bg-slate-deep/50 flex items-center justify-center p-6">
+              <svg viewBox="0 0 120 80" class="w-full h-full">
+                <path d="M 20 40 L 40 25 L 70 20 L 95 30 L 100 50 L 85 65 L 50 70 L 25 60 Z" fill="oklch(0.55 0.15 160 / 0.3)" stroke="#00875A" stroke-width="1.5"/>
+                <path d="M 40 25 L 55 15 L 80 18 L 70 20 Z" fill="oklch(0.55 0.15 160 / 0.2)" stroke="#00875A" stroke-width="1"/>
+                <circle cx="60" cy="40" r="2" fill="#00875A"/>
+              </svg>
+              <div class="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent"></div>
+              <div class="absolute top-4 left-4 w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: #00875A20; color: #00875A;"><i data-lucide="map-pin" class="w-5 h-5"></i></div>
+            </div>
+            <div class="p-6">
+              <h3 class="font-serif text-xl mb-2 group-hover:text-primary transition-colors">Limites Administratives</h3>
+              <p class="text-sm text-muted-foreground mb-4 line-clamp-2">Frontières officielles des départements, communes et quartiers du Bénin avec métadonnées complètes.</p>
+              <div class="flex items-center gap-4 mb-4 text-xs font-mono text-muted-foreground"><span>100% du territoire</span><span class="text-primary">99.8%</span></div>
+              <div class="flex flex-wrap gap-2 mb-4">
+                <span class="px-2 py-1 rounded text-xs font-mono bg-secondary/50 text-muted-foreground">GeoJSON</span>
+                <span class="px-2 py-1 rounded text-xs font-mono bg-secondary/50 text-muted-foreground">Shapefile</span>
+                <span class="px-2 py-1 rounded text-xs font-mono bg-secondary/50 text-muted-foreground">KML</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <a href="{% url 'website:atlas' %}" class="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"><i data-lucide="eye" class="w-4 h-4"></i>Visualiser</a>
+                <button type="button" class="w-10 h-10 rounded-lg border border-border/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"><i data-lucide="download" class="w-4 h-4"></i></button>
+              </div>
+            </div>
+          </div>
+          <!-- hydrography -->
+          <div data-carte-layer data-carte-cat="hydro" data-layer-color="#4ECDC4" class="group relative glass-panel rounded-2xl overflow-hidden card-lift cursor-pointer">
+            <div class="relative h-36 bg-slate-deep/50 flex items-center justify-center p-6">
+              <svg viewBox="0 0 120 80" class="w-full h-full">
+                <path d="M 10 40 Q 40 30 60 45 T 110 35" fill="none" stroke="#4ECDC4" stroke-width="2.5" class="animate-subtle-pulse"/>
+                <path d="M 60 45 Q 70 25 55 10" fill="none" stroke="#4ECDC4" stroke-width="1.5" opacity="0.6"/>
+                <path d="M 60 45 Q 80 60 90 75" fill="none" stroke="#4ECDC4" stroke-width="1.5" opacity="0.5"/>
+              </svg>
+              <div class="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent"></div>
+              <div class="absolute top-4 left-4 w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: #4ECDC420; color: #4ECDC4;"><i data-lucide="droplets" class="w-5 h-5"></i></div>
+            </div>
+            <div class="p-6">
+              <h3 class="font-serif text-xl mb-2 group-hover:text-primary transition-colors">Réseau Hydrographique</h3>
+              <p class="text-sm text-muted-foreground mb-4 line-clamp-2">Cours d'eau, lacs, zones humides et bassins versants cartographiés avec précision.</p>
+              <div class="flex items-center gap-4 mb-4 text-xs font-mono text-muted-foreground"><span>Tous les cours d'eau</span><span class="text-primary">98.5%</span></div>
+              <div class="flex flex-wrap gap-2 mb-4">
+                <span class="px-2 py-1 rounded text-xs font-mono bg-secondary/50 text-muted-foreground">GeoJSON</span>
+                <span class="px-2 py-1 rounded text-xs font-mono bg-secondary/50 text-muted-foreground">Shapefile</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <a href="{% url 'website:atlas' %}" class="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"><i data-lucide="eye" class="w-4 h-4"></i>Visualiser</a>
+                <button type="button" class="w-10 h-10 rounded-lg border border-border/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"><i data-lucide="download" class="w-4 h-4"></i></button>
+              </div>
+            </div>
+          </div>
+          <!-- infrastructure -->
+          <div data-carte-layer data-carte-cat="infra" data-layer-color="#A67C52" class="group relative glass-panel rounded-2xl overflow-hidden card-lift cursor-pointer">
+            <div class="relative h-36 bg-slate-deep/50 flex items-center justify-center p-6">
+              <svg viewBox="0 0 120 80" class="w-full h-full">
+                <line x1="10" y1="40" x2="110" y2="40" stroke="oklch(0.4 0.02 260)" stroke-width="1"/>
+                <line x1="60" y1="10" x2="60" y2="70" stroke="oklch(0.4 0.02 260)" stroke-width="1"/>
+                <circle cx="35" cy="30" r="4" fill="#A67C52"/>
+                <circle cx="85" cy="50" r="4" fill="#A67C52"/>
+                <circle cx="60" cy="40" r="5" fill="#A67C52"/>
+              </svg>
+              <div class="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent"></div>
+              <div class="absolute top-4 left-4 w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: #A67C5220; color: #A67C52;"><i data-lucide="building" class="w-5 h-5"></i></div>
+            </div>
+            <div class="p-6">
+              <h3 class="font-serif text-xl mb-2 group-hover:text-primary transition-colors">Infrastructures</h3>
+              <p class="text-sm text-muted-foreground mb-4 line-clamp-2">Réseau routier, établissements de santé, écoles et services publics géolocalisés.</p>
+              <div class="flex items-center gap-4 mb-4 text-xs font-mono text-muted-foreground"><span>Zones urbaines</span><span class="text-primary">97.2%</span></div>
+              <div class="flex flex-wrap gap-2 mb-4">
+                <span class="px-2 py-1 rounded text-xs font-mono bg-secondary/50 text-muted-foreground">GeoJSON</span>
+                <span class="px-2 py-1 rounded text-xs font-mono bg-secondary/50 text-muted-foreground">CSV</span>
+                <span class="px-2 py-1 rounded text-xs font-mono bg-secondary/50 text-muted-foreground">API</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <a href="{% url 'website:atlas' %}" class="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"><i data-lucide="eye" class="w-4 h-4"></i>Visualiser</a>
+                <button type="button" class="w-10 h-10 rounded-lg border border-border/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"><i data-lucide="download" class="w-4 h-4"></i></button>
+              </div>
+            </div>
+          </div>
+          <!-- landuse -->
+          <div data-carte-layer data-carte-cat="sols" data-layer-color="#2D5A27" class="group relative glass-panel rounded-2xl overflow-hidden card-lift cursor-pointer">
+            <div class="relative h-36 bg-slate-deep/50 flex items-center justify-center p-6">
+              <svg viewBox="0 0 120 80" class="w-full h-full">
+                <rect x="10" y="10" width="30" height="25" fill="#2D5A27" opacity="0.6"/>
+                <rect x="45" y="10" width="35" height="25" fill="#00875A" opacity="0.4"/>
+                <rect x="85" y="10" width="25" height="25" fill="#A67C52" opacity="0.5"/>
+                <rect x="10" y="40" width="45" height="30" fill="#4ECDC4" opacity="0.3"/>
+                <rect x="60" y="40" width="50" height="30" fill="#2D5A27" opacity="0.7"/>
+              </svg>
+              <div class="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent"></div>
+              <div class="absolute top-4 left-4 w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: #2D5A2720; color: #2D5A27;"><i data-lucide="trees" class="w-5 h-5"></i></div>
+            </div>
+            <div class="p-6">
+              <h3 class="font-serif text-xl mb-2 group-hover:text-primary transition-colors">Occupation des Sols</h3>
+              <p class="text-sm text-muted-foreground mb-4 line-clamp-2">Classification détaillée de l'utilisation des terres: agricole, urbain, forêt, etc.</p>
+              <div class="flex items-center gap-4 mb-4 text-xs font-mono text-muted-foreground"><span>100% du territoire</span><span class="text-primary">95.0%</span></div>
+              <div class="flex flex-wrap gap-2 mb-4">
+                <span class="px-2 py-1 rounded text-xs font-mono bg-secondary/50 text-muted-foreground">GeoTIFF</span>
+                <span class="px-2 py-1 rounded text-xs font-mono bg-secondary/50 text-muted-foreground">Shapefile</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <a href="{% url 'website:atlas' %}" class="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"><i data-lucide="eye" class="w-4 h-4"></i>Visualiser</a>
+                <button type="button" class="w-10 h-10 rounded-lg border border-border/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"><i data-lucide="download" class="w-4 h-4"></i></button>
+              </div>
+            </div>
+          </div>
+          <!-- electricity -->
+          <div data-carte-layer data-carte-cat="energie" data-layer-color="#FFB800" class="group relative glass-panel rounded-2xl overflow-hidden card-lift cursor-pointer">
+            <div class="relative h-36 bg-slate-deep/50 flex items-center justify-center p-6">
+              <svg viewBox="0 0 120 80" class="w-full h-full">
+                <line x1="20" y1="20" x2="100" y2="20" stroke="#FFB800" stroke-width="2" stroke-dasharray="8 4"/>
+                <line x1="20" y1="60" x2="100" y2="60" stroke="#FFB800" stroke-width="2" stroke-dasharray="8 4"/>
+                <rect x="35" y="35" width="10" height="10" fill="#FFB800" opacity="0.8"/>
+                <rect x="75" y="35" width="10" height="10" fill="#FFB800" opacity="0.8"/>
+              </svg>
+              <div class="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent"></div>
+              <div class="absolute top-4 left-4 w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: #FFB80020; color: #FFB800;"><i data-lucide="zap" class="w-5 h-5"></i></div>
+            </div>
+            <div class="p-6">
+              <h3 class="font-serif text-xl mb-2 group-hover:text-primary transition-colors">Réseau Électrique</h3>
+              <p class="text-sm text-muted-foreground mb-4 line-clamp-2">Lignes haute et moyenne tension, postes de transformation et zones de couverture.</p>
+              <div class="flex items-center gap-4 mb-4 text-xs font-mono text-muted-foreground"><span>Réseau national</span><span class="text-primary">96.8%</span></div>
+              <div class="flex flex-wrap gap-2 mb-4">
+                <span class="px-2 py-1 rounded text-xs font-mono bg-secondary/50 text-muted-foreground">GeoJSON</span>
+                <span class="px-2 py-1 rounded text-xs font-mono bg-secondary/50 text-muted-foreground">Shapefile</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <a href="{% url 'website:atlas' %}" class="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"><i data-lucide="eye" class="w-4 h-4"></i>Visualiser</a>
+                <button type="button" class="w-10 h-10 rounded-lg border border-border/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"><i data-lucide="download" class="w-4 h-4"></i></button>
+              </div>
+            </div>
+          </div>
+          <!-- roads -->
+          <div data-carte-layer data-carte-cat="routes" data-layer-color="#8B5CF6" class="group relative glass-panel rounded-2xl overflow-hidden card-lift cursor-pointer">
+            <div class="relative h-36 bg-slate-deep/50 flex items-center justify-center p-6">
+              <svg viewBox="0 0 120 80" class="w-full h-full">
+                <path d="M 10 60 Q 40 40 60 45 Q 80 50 110 30" fill="none" stroke="#8B5CF6" stroke-width="2.5"/>
+                <path d="M 30 10 Q 45 35 60 45" fill="none" stroke="#8B5CF6" stroke-width="1.5" opacity="0.6"/>
+                <path d="M 60 45 Q 75 60 90 75" fill="none" stroke="#8B5CF6" stroke-width="1.5" opacity="0.6"/>
+              </svg>
+              <div class="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent"></div>
+              <div class="absolute top-4 left-4 w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: #8B5CF620; color: #8B5CF6;"><i data-lucide="route" class="w-5 h-5"></i></div>
+            </div>
+            <div class="p-6">
+              <h3 class="font-serif text-xl mb-2 group-hover:text-primary transition-colors">Réseau Routier</h3>
+              <p class="text-sm text-muted-foreground mb-4 line-clamp-2">Routes nationales, régionales et pistes rurales avec état et classification.</p>
+              <div class="flex items-center gap-4 mb-4 text-xs font-mono text-muted-foreground"><span>15,000+ km</span><span class="text-primary">98.0%</span></div>
+              <div class="flex flex-wrap gap-2 mb-4">
+                <span class="px-2 py-1 rounded text-xs font-mono bg-secondary/50 text-muted-foreground">GeoJSON</span>
+                <span class="px-2 py-1 rounded text-xs font-mono bg-secondary/50 text-muted-foreground">OSM</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <a href="{% url 'website:atlas' %}" class="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"><i data-lucide="eye" class="w-4 h-4"></i>Visualiser</a>
+                <button type="button" class="w-10 h-10 rounded-lg border border-border/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"><i data-lucide="download" class="w-4 h-4"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="max-w-7xl mx-auto px-6 lg:px-8 mt-20 text-center">
+        <div class="glass-panel rounded-3xl p-12">
+          <h2 class="font-serif text-3xl mb-4">Besoin de données personnalisées ?</h2>
+          <p class="text-muted-foreground mb-8 max-w-xl mx-auto">Nous pouvons créer des couches cartographiques sur mesure pour vos projets spécifiques.</p>
+          <a href="{% url 'website:contact' %}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent text-accent-foreground font-medium hover:bg-accent/90 transition-colors bronze-glow">Nous contacter<i data-lucide="arrow-right" class="w-4 h-4"></i></a>
+        </div>
+      </section>
+    </main>
+{% endblock %}

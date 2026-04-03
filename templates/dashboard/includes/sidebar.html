@@ -1,0 +1,9 @@
+<ul class="nav flex-column">
+  <li><a class="nav-link {% if request.resolver_match.url_name == 'dashboard_client' %}active{% endif %}" href="{% url 'accounts:dashboard_client' %}"><i class="ti ti-home"></i><span class="nav-text">Accueil</span></a></li>
+  <li><a class="nav-link {% if request.resolver_match.url_name == 'dashboard_library' %}active{% endif %}" href="{% url 'accounts:dashboard_library' %}"><i class="ti ti-folders"></i><span class="nav-text">Mes Documents</span></a></li>
+  <li><a class="nav-link {% if request.resolver_match.url_name == 'dashboard_store' %}active{% endif %}" href="{% url 'accounts:dashboard_store' %}"><i class="ti ti-shopping-cart"></i><span class="nav-text">Boutique</span></a></li>
+  <li><a class="nav-link {% if request.resolver_match.url_name == 'dashboard_billing' %}active{% endif %}" href="{% url 'accounts:dashboard_billing' %}"><i class="ti ti-receipt"></i><span class="nav-text">Facturation</span></a></li>
+  <li><a class="nav-link {% if request.resolver_match.url_name == 'dashboard_settings' %}active{% endif %}" href="{% url 'accounts:dashboard_settings' %}"><i class="ti ti-user"></i><span class="nav-text">Mon Profil</span></a></li>
+  <li class="px-4 pt-3 pb-1"><small class="nav-text text-muted">Carte</small></li>
+  <li><a class="nav-link" href="{% url 'website:atlas' %}"><i class="ti ti-map"></i><span class="nav-text">Atlas IlèTô</span></a></li>
+</ul>

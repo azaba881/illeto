@@ -1,0 +1,94 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block title %}Inscription | Illeto{% endblock %}
+{% block meta_description %}Créez votre compte Illeto pour accéder à l’Atlas et aux données territoriales.{% endblock %}
+
+{% block body_attr %} class="min-h-screen text-foreground font-sans antialiased bg-[#03050c]"{% endblock %}
+{% block surface_extra_class %} flex flex-col{% endblock %}
+
+{% block content %}
+    <main class="auth-page flex-1 flex flex-col items-center justify-center px-6 pt-28 pb-16">
+      <div class="auth-card w-full max-w-md rounded-3xl p-8 sm:p-10">
+        <div class="text-center mb-8">
+          <img src="{% static 'assets/images/favicon.png' %}" alt="Illeto" class="w-10 h-10 mx-auto mb-4" style="filter: brightness(0) invert(1);zoom: 2;">
+          <h1 class="font-serif text-3xl sm:text-4xl mb-2">Créer un compte</h1>
+          <p class="text-sm text-muted-foreground">Accédez à l’Atlas et aux couches selon votre offre.</p>
+        </div>
+        <form class="space-y-5" method="post" action="{% url 'accounts:register' %}">
+          {% csrf_token %}
+          {% if form.non_field_errors %}
+            <div class="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm" role="alert">
+              {{ form.non_field_errors }}
+            </div>
+          {% endif %}
+          <div>
+            <label for="{{ form.email.id_for_label }}" class="block text-xs font-mono uppercase tracking-wider text-muted-foreground mb-2">{{ form.email.label }}</label>
+            {{ form.email }}
+            {% if form.email.errors %}<p class="text-xs text-destructive mt-1">{{ form.email.errors.0 }}</p>{% endif %}
+          </div>
+          <div>
+            <label for="{{ form.password1.id_for_label }}" class="block text-xs font-mono uppercase tracking-wider text-muted-foreground mb-2">{{ form.password1.label }}</label>
+            <div class="relative">
+              {{ form.password1 }}
+              <button type="button" id="toggle-reg-pass1" class="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40" aria-label="Afficher le mot de passe" aria-pressed="false">
+                <i data-lucide="eye" class="w-4 h-4" aria-hidden="true"></i>
+              </button>
+            </div>
+            {% if form.password1.errors %}<p class="text-xs text-destructive mt-1">{{ form.password1.errors.0 }}</p>{% endif %}
+          </div>
+          <div>
+            <label for="{{ form.password2.id_for_label }}" class="block text-xs font-mono uppercase tracking-wider text-muted-foreground mb-2">{{ form.password2.label }}</label>
+            <div class="relative">
+              {{ form.password2 }}
+              <button type="button" id="toggle-reg-pass2" class="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40" aria-label="Afficher le mot de passe" aria-pressed="false">
+                <i data-lucide="eye" class="w-4 h-4" aria-hidden="true"></i>
+              </button>
+            </div>
+            {% if form.password2.errors %}<p class="text-xs text-destructive mt-1">{{ form.password2.errors.0 }}</p>{% endif %}
+          </div>
+          <label class="flex items-start gap-3 text-xs text-muted-foreground cursor-pointer">
+            {{ form.accept_terms }}
+            <span>J’accepte les <a href="#" class="text-primary hover:underline">conditions d’utilisation</a> et la <a href="#" class="text-primary hover:underline">politique de confidentialité</a>.</span>
+          </label>
+          {% if form.accept_terms.errors %}<p class="text-xs text-destructive">{{ form.accept_terms.errors.0 }}</p>{% endif %}
+          <button type="submit" class="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#0A3D36] text-primary-foreground font-medium hover:bg-primary/90 transition-colors emerald-glow">
+            <span>S’inscrire</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </form>
+        <p class="text-center text-sm text-muted-foreground mt-8">
+          Vous avez déjà un compte ? <a href="{% url 'accounts:login' %}" class="text-primary font-medium hover:underline">Connexion</a>
+        </p>
+      </div>
+      <p class="mt-10 text-xs text-muted-foreground/60 font-mono">
+        <a href="{% url 'website:index' %}" class="hover:text-primary transition-colors">← Retour à l’accueil</a>
+      </p>
+    </main>
+{% endblock %}
+
+{% block site_footer %}{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+(function () {
+  function wireToggle(btnId, inputId) {
+    var btn = document.getElementById(btnId);
+    var input = document.getElementById(inputId);
+    if (!btn || !input) return;
+    btn.addEventListener("click", function () {
+      var show = input.type === "password";
+      input.type = show ? "text" : "password";
+      btn.setAttribute("aria-pressed", show ? "true" : "false");
+      btn.setAttribute("aria-label", show ? "Masquer le mot de passe" : "Afficher le mot de passe");
+      var icon = btn.querySelector("[data-lucide]");
+      if (icon) icon.setAttribute("data-lucide", show ? "eye-off" : "eye");
+      if (window.lucide && typeof lucide.createIcons === "function") lucide.createIcons();
+    });
+  }
+  wireToggle("toggle-reg-pass1", "reg-pass");
+  wireToggle("toggle-reg-pass2", "reg-pass2");
+})();
+</script>
+{% endblock %}

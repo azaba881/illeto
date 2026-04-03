@@ -1,0 +1,62 @@
+{% extends "admin/base_site.html" %}
+{% block title %}Maintenance géographique | {{ block.super }}{% endblock %}
+{% block content %}
+<p><a href="{% url 'admin:index' %}">← Retour à l’administration Django</a></p>
+<h1>Maintenance géographique</h1>
+<p class="help">Journaux d’import et indicateur de complétude (communes avec au moins un quartier).</p>
+
+<h2>Complétude par département</h2>
+<table class="listing">
+  <thead>
+    <tr>
+      <th>Département</th>
+      <th>Communes (hors factice)</th>
+      <th>Avec quartiers</th>
+      <th>Couverture</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in completeness %}
+    <tr>
+      <td>{{ row.department.name }}</td>
+      <td>{{ row.commune_count }}</td>
+      <td>{{ row.with_quartiers }}</td>
+      <td><strong>{{ row.percent_quartiers }}%</strong></td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4">Aucun département.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2 style="margin-top:2rem;">Derniers imports</h2>
+<table class="listing">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Commande</th>
+      <th>Fichier</th>
+      <th>Succès (compteur)</th>
+      <th>Utilisateur</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for log in import_logs %}
+    <tr>
+      <td>{{ log.created_at|date:"Y-m-d H:i" }}</td>
+      <td>{{ log.command_name }}</td>
+      <td>{{ log.file_name|default:"—" }}</td>
+      <td>{{ log.success_count }}</td>
+      <td>{% if log.admin_user %}{{ log.admin_user.email }}{% else %}—{% endif %}</td>
+    </tr>
+    {% if log.error_log %}
+    <tr class="row-form-errors">
+      <td colspan="5"><pre style="white-space:pre-wrap;max-height:120px;overflow:auto;">{{ log.error_log }}</pre></td>
+    </tr>
+    {% endif %}
+    {% empty %}
+    <tr><td colspan="5">Aucun journal.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

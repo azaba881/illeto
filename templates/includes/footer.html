@@ -1,0 +1,86 @@
+{% load static %}
+    <div class="site-footer-wave-wrap" aria-hidden="true">
+      <svg class="site-footer-wave" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 80" preserveAspectRatio="none">
+        <defs>
+          <!-- Couleurs .illeto-band-teal (footer) : radial teal + verts 10,61,54 + 8,13,24 → 3,5,12 -->
+          <linearGradient id="footerWaveFill" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="100%" stop-color="#03050c"/>
+            <stop offset="58%" stop-color="rgba(8, 13, 24, 0.82)"/>
+            <stop offset="100%" stop-color="#03050c"/>
+          </linearGradient>
+          <linearGradient id="footerWaveStroke" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="rgba(148, 163, 184, 0.1)"/>
+            <stop offset="50%" stop-color="rgba(45, 212, 191, 0.26)"/>
+            <stop offset="100%" stop-color="rgba(148, 163, 184, 0.1)"/>
+          </linearGradient>
+        </defs>
+        <path fill="url(#footerWaveFill)" d="M0,40 C360,90 720,0 1080,40 C1260,60 1380,50 1440,45 L1440,80 L0,80 Z"/>
+        <path fill="none" stroke="url(#footerWaveStroke)" stroke-width="1" d="M0,40 C360,90 720,0 1080,40 C1260,60 1380,50 1440,45"/>
+      </svg>
+    </div>
+    <footer class="site-footer illeto-band-teal relative border-white/[0.08] overflow-hidden -mt-px">
+      <div class="site-footer__glow absolute inset-0 pointer-events-none" aria-hidden="true"></div>
+      <div class="absolute top-8 right-8 hidden lg:block z-[1]">
+        <div class="font-mono text-[10px] text-muted-foreground/35 tracking-wider text-right">
+          <div>Territoire béninois</div>
+          <div>112&nbsp;622 km²</div>
+        </div>
+      </div>
+      <div class="relative max-w-7xl mx-auto px-6 lg:px-8 pt-16 pb-8">
+        <div class="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-14 pb-14 border-b border-white/[0.07]">
+          <div class="max-w-md">
+            <a href="{% url 'website:index' %}" class="mb-5">
+              <img src="{% static 'assets/images/favicon.png' %}" alt="" style="filter: brightness(0) invert(1);" width="100" height="100" />
+            </a>
+            <p class="text-sm text-muted-foreground leading-relaxed mb-6">Données administratives, environnementales et <br> infrastructurelles — du département au quartier.</p>
+            <div class="flex flex-wrap items-center gap-3">
+              <a href="{% url 'website:atlas' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">Atlas</a>
+              <a href="{% url 'website:contact' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/12 text-sm text-foreground/90 hover:border-primary/35 hover:bg-white/[0.03] transition-all">Nous contacter</a>
+            </div>
+            <div class="flex items-center gap-3 mt-8">
+              <a href="#" class="w-10 h-10 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/25 transition-all duration-300" aria-label="GitHub"><i data-lucide="github" class="w-4 h-4"></i></a>
+              <a href="#" class="w-10 h-10 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/25 transition-all duration-300" aria-label="LinkedIn"><i data-lucide="linkedin" class="w-4 h-4"></i></a>
+              <a href="mailto:contact@illeto.bj" class="w-10 h-10 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/25 transition-all duration-300" aria-label="Courriel"><i data-lucide="mail" class="w-4 h-4"></i></a>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-10 lg:gap-14 xl:gap-16 flex-1 max-w-3xl">
+            <div>
+              <h4 class="font-mono text-[10px] tracking-[0.22em] text-primary/75 uppercase mb-4">Explorer</h4>
+              <ul class="space-y-2.5">
+                <li><a href="{% url 'website:cartes' %}" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Trouver une carte</a></li>
+                <li><a href="{% url 'website:atlas' %}" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Explorateur Atlas</a></li>
+                <li><a href="{% url 'website:index' %}#tarifs" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Tarifs</a></li>
+                <li><a href="{% url 'website:index' %}#departements" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Départements</a></li>
+                <li><a href="{% url 'website:index' %}#villes" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Villes</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="font-mono text-[10px] tracking-[0.22em] text-primary/75 uppercase mb-4">L'entreprise</h4>
+              <ul class="space-y-2.5">
+                <li><a href="{% url 'website:a_propos' %}" class="text-sm text-muted-foreground hover:text-foreground transition-colors">À propos</a></li>
+                <li><a href="{% url 'website:contact' %}" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Nous contacter</a></li>
+                <li><a href="{% url 'website:partenaire' %}" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Devenir partenaire</a></li>
+                <li><a href="{% url 'website:index' %}#comment-ca-marche" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Comment ça marche</a></li>
+                <li><a href="{% url 'website:faq' %}" class="text-sm text-muted-foreground hover:text-foreground transition-colors">FAQ</a></li>
+              </ul>
+            </div>
+            <div class="col-span-2 sm:col-span-1">
+              <h4 class="font-mono text-[10px] tracking-[0.22em] text-primary/75 uppercase mb-4">Légal</h4>
+              <ul class="space-y-2.5">
+                <li><a href="#" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Mentions légales</a></li>
+                <li><a href="#" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Confidentialité</a></li>
+                <li><a href="#" class="text-sm text-muted-foreground hover:text-foreground transition-colors">CGU</a></li>
+                <li><a href="#" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Cookies</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="pt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <p class="text-xs text-muted-foreground/55 font-mono">© 2026 Illeto. Tous droits réservés.</p>
+          <div class="flex items-start sm:items-center gap-3 text-sm text-muted-foreground">
+            <i data-lucide="map-pin" class="w-4 h-4 text-primary/70 shrink-0 mt-0.5 sm:mt-0"></i>
+            <span>Cotonou, Bénin — Cadjèhoun · <a href="mailto:contact@illeto.bj" class="hover:text-foreground transition-colors">contact@illeto.bj</a></span>
+          </div>
+        </div>
+      </div>
+    </footer>

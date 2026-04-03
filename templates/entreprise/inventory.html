@@ -1,0 +1,101 @@
+{% extends "layouts/dashboard_base.html" %}
+{% load static %}
+{% block dashboard_title %}Inventaire POI — IlèTô{% endblock %}
+{% block dashboard_content %}
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="d-flex justify-content-between align-items-center mb-4 gap-3 flex-wrap">
+            <div>
+              <h1 class="fs-3 mb-1" style="font-weight: 950;">Inventaire des points d’intérêt</h1>
+              <p class="mb-0 illeto-muted">
+                Liste des <strong>PointInteret</strong> pour la commune sélectionnée (filtre identique au périmètre métier).
+              </p>
+            </div>
+            <a class="btn btn-outline-secondary" href="{% url 'accounts:dashboard_settings' %}">
+              <i class="ti ti-map-pin me-2"></i> Commune par défaut
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-4">
+        <div class="col-12">
+          <div class="card illeto-card">
+            <div class="card-body p-4">
+              <form method="get" action="{% url 'accounts:dashboard_inventory' %}" class="row g-3 align-items-end flex-wrap">
+                <div class="col-12 col-md-8 col-lg-6">
+                  <label class="small illeto-muted fw-bold d-block mb-1">Commune</label>
+                  <select name="commune_id" class="form-select" onchange="this.form.submit()">
+                    <option value="">— Choisir une commune —</option>
+                    {% for c in commune_choices %}
+                      <option value="{{ c.pk }}" {% if selected_commune and selected_commune.pk == c.pk %}selected{% endif %}>
+                        {{ c.departement.name }} — {{ c.name }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-12 col-md-4 col-lg-3">
+                  <button type="submit" class="btn btn-primary w-100">Actualiser</button>
+                </div>
+              </form>
+              {% if selected_commune %}
+                <p class="small illeto-muted mt-3 mb-0">
+                  Périmètre actuel&nbsp;: <strong>{{ selected_commune.departement.name }} — {{ selected_commune.name }}</strong>
+                  · {{ poi_list|length }} POI affiché{{ poi_list|length|pluralize }} (max. 500)
+                  {% if commune_note %}<span class="d-block mt-1">{{ commune_note }}</span>{% endif %}
+                </p>
+              {% else %}
+                <p class="small illeto-muted mt-3 mb-0">
+                  Sélectionnez une commune ci-dessus, ou définissez une <a href="{% url 'accounts:dashboard_settings' %}" class="link-light text-decoration-underline">commune favorite</a> pour pré-remplir cet écran.
+                </p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% if selected_commune %}
+      <div class="row g-3">
+        <div class="col-12">
+          <div class="card illeto-card">
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table illeto-table align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th>Nom</th>
+                      <th>Type</th>
+                      <th>Longitude</th>
+                      <th>Latitude</th>
+                      <th>Source</th>
+                      <th>Quartier</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for poi in poi_list %}
+                    <tr>
+                      <td style="font-weight: 800;">{{ poi.name }}</td>
+                      <td class="illeto-muted">{{ poi.get_category_display }}</td>
+                      <td class="illeto-muted font-monospace small">{% if poi.geom %}{{ poi.geom.x|floatformat:6 }}{% else %}—{% endif %}</td>
+                      <td class="illeto-muted font-monospace small">{% if poi.geom %}{{ poi.geom.y|floatformat:6 }}{% else %}—{% endif %}</td>
+                      <td class="illeto-muted small">{{ poi.source|default:"OSM" }}</td>
+                      <td class="illeto-muted">{% if poi.quartier %}{{ poi.quartier.name }}{% else %}—{% endif %}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                      <td colspan="6" class="p-4 illeto-muted">Aucun POI indexé pour cette commune.</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <div style="height: 32px;"></div>
+    </div>
+{% endblock %}

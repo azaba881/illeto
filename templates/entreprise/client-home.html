@@ -1,0 +1,92 @@
+{% extends "layouts/dashboard_base.html" %}
+{% load static %}
+{% block dashboard_title %}Espace Décideur — IlèTô{% endblock %}
+{% block dashboard_content %}
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="d-flex justify-content-between align-items-center mb-4 gap-3 flex-wrap">
+            <div>
+              <h1 class="fs-3 mb-1" style="font-weight: 950;">Tableau de bord décideur</h1>
+              <p class="mb-0 illeto-muted">{{ billing_status.subtitle }}</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <span class="illeto-pill" style="background: rgba(45,212,191,0.12); border-color: rgba(45,212,191,0.35);">{{ account_badge }}</span>
+              <span class="illeto-pill">{{ billing_status.label }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-4">
+        <div class="col-12 col-md-4">
+          <div class="card illeto-card h-100">
+            <div class="card-body p-4">
+              <div class="illeto-muted small" style="font-weight: 800;">Bibliothèque Shapefile</div>
+              <div style="font-weight: 1000; font-size: 2rem;">{{ inventory_count }}</div>
+              <div class="illeto-muted small mt-1">Exports natifs (.zip) enregistrés</div>
+              <a class="btn btn-sm btn-outline-secondary mt-2" href="{% url 'accounts:dashboard_library' %}">Voir mes documents</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="card illeto-card h-100">
+            <div class="card-body p-4">
+              <div class="illeto-muted small" style="font-weight: 800;">Offre</div>
+              <div style="font-weight: 1000; font-size: 1.25rem;">{{ billing_status.label }}</div>
+              <div class="illeto-muted small mt-1">{% if billing_status.is_institution %}Facturation institution{% else %}GeoJSON certifié · Shapefile serveur{% endif %}</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="card illeto-card h-100">
+            <div class="card-body p-4">
+              <div class="illeto-muted small" style="font-weight: 800;">Atlas</div>
+              <a class="btn btn-primary w-100 mt-2" href="{% url 'website:atlas' %}"><i class="ti ti-map me-1"></i> Ouvrir l’Atlas</a>
+              <a class="btn btn-outline-secondary w-100 mt-2" href="{% url 'accounts:dashboard_reports' %}">Rapports &amp; exports</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% if commune_stats %}
+      <div class="row g-3 mb-4">
+        <div class="col-12">
+          <div class="card illeto-card">
+            <div class="card-body p-4">
+              <h2 class="fs-5 mb-1" style="font-weight: 900;">Analyse — {{ commune_stats.commune_name }}</h2>
+              <p class="small illeto-muted mb-3">{{ commune_stats.commune_note }}</p>
+              <div class="row g-3">
+                <div class="col-6 col-md-3">
+                  <div class="illeto-muted small">POI Santé</div>
+                  <div class="fs-4 fw-bold">{{ commune_stats.poi_health }}</div>
+                </div>
+                <div class="col-6 col-md-3">
+                  <div class="illeto-muted small">POI Marchés</div>
+                  <div class="fs-4 fw-bold">{{ commune_stats.poi_market }}</div>
+                </div>
+                <div class="col-6 col-md-3">
+                  <div class="illeto-muted small">Total POI</div>
+                  <div class="fs-4 fw-bold">{{ commune_stats.poi_total }}</div>
+                </div>
+                <div class="col-6 col-md-3">
+                  <div class="illeto-muted small">Score de risque (indicateur)</div>
+                  <div class="fs-4 fw-bold">{{ commune_stats.risk_score }} / 100</div>
+                </div>
+              </div>
+              <p class="small illeto-muted mt-3 mb-0">
+                Aléa inondation (serveur)&nbsp;: <strong>{{ commune_stats.flood_percent|stringformat:".2f" }}%</strong>
+                <span class="opacity-75"> — {{ commune_stats.flood_source }}</span>
+              </p>
+              <p class="small illeto-muted mt-2 mb-0">Définissez la commune de référence dans <a href="{% url 'accounts:dashboard_settings' %}">Mon profil</a>.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="alert alert-secondary border-0" style="background: rgba(255,255,255,0.06); color: inherit;">
+        Choisissez une <strong>commune favorite</strong> dans les paramètres pour afficher les statistiques POI et le score indicatif.
+      </div>
+      {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,155 @@
+{% extends "layouts/dashboard_base.html" %}
+{% load static %}
+{% block dashboard_title %}Facturation - Illeto{% endblock %}
+{% block dashboard_content %}
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="d-flex justify-content-between align-items-center mb-4 gap-3 flex-wrap">
+            <div>
+              <h1 class="fs-3 mb-1" style="font-weight: 950;">Facturation & Abonnements</h1>
+              <p class="mb-0 illeto-muted">Historique des paiements, gestion du forfait et factures en PDF.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-4">
+        <div class="col-12 col-lg-7">
+          <div class="card illeto-card h-100">
+            <div class="card-body p-4">
+              <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                <div>
+                  <div class="illeto-muted small" style="font-weight: 900; letter-spacing: 0.01em;">Forfait</div>
+                  <div style="font-weight: 1000; font-size: 1.5rem; margin-top: 4px;">Plan <span id="illetoCurrentPlan">Étudiant</span></div>
+                  <div class="small illeto-muted mt-2">Accès aux téléchargements + crédits mensuels</div>
+                </div>
+                <div>
+                  <button id="illetoOpenPlanModal" class="btn btn-primary" type="button">
+                    Passer au plan Expert
+                  </button>
+                </div>
+              </div>
+
+              <div class="row mt-4 g-3">
+                <div class="col-12 col-md-4">
+                  <div class="p-3" style="border: 1px solid rgba(255,255,255,0.08); border-radius: 16px;">
+                    <div class="illeto-muted small" style="font-weight: 900; letter-spacing: 0.01em;">Crédits</div>
+                    <div style="font-weight: 1000; font-size: 1.25rem; margin-top: 4px;">34 / mois</div>
+                  </div>
+                </div>
+                <div class="col-12 col-md-4">
+                  <div class="p-3" style="border: 1px solid rgba(255,255,255,0.08); border-radius: 16px;">
+                    <div class="illeto-muted small" style="font-weight: 900; letter-spacing: 0.01em;">Téléchargements</div>
+                    <div style="font-weight: 1000; font-size: 1.25rem; margin-top: 4px;">jusqu’à 50</div>
+                  </div>
+                </div>
+                <div class="col-12 col-md-4">
+                  <div class="p-3" style="border: 1px solid rgba(255,255,255,0.08); border-radius: 16px;">
+                    <div class="illeto-muted small" style="font-weight: 900; letter-spacing: 0.01em;">Validité</div>
+                    <div style="font-weight: 1000; font-size: 1.25rem; margin-top: 4px;">30 jours</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-4 small" style="color: rgba(148,163,184,0.74);">
+                La mise à niveau est effectuée en toute simplicité (simulation UI).
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-5">
+          <div class="card illeto-card h-100">
+            <div class="card-body p-4">
+              <div style="font-weight: 1000; font-size: 1.15rem;">Moyens de paiement</div>
+              <div class="small illeto-muted mt-2">
+                Payer via FedaPay ou KKiaPay pour le Bénin.
+              </div>
+
+              <div class="mt-3 d-flex gap-2 flex-wrap">
+                <div class="p-3" style="border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; flex: 1;">
+                  <div style="font-weight: 1000;">FedaPay</div>
+                  <div class="small illeto-muted mt-1">Paiements rapides</div>
+                </div>
+                <div class="p-3" style="border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; flex: 1;">
+                  <div style="font-weight: 1000;">KKiaPay</div>
+                  <div class="small illeto-muted mt-1">Paiements sécurisés</div>
+                </div>
+              </div>
+
+              <div class="mt-4">
+                <a class="btn btn-outline-secondary w-100" href="{% url 'accounts:dashboard_store' %}">
+                  Acheter via la boutique
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card illeto-card">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+            <div>
+              <div style="font-weight: 1000; font-size: 1.2rem;">Historique des paiements</div>
+              <div class="small illeto-muted mt-1">Factures PDF disponibles</div>
+            </div>
+          </div>
+
+          <div class="table-responsive mt-3">
+            <table class="table illeto-table align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Facture</th>
+                  <th>Date</th>
+                  <th>Montant</th>
+                  <th>Statut</th>
+                  <th style="width: 160px;">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight: 900;">FAC-2026-04-01</td>
+                  <td class="illeto-muted">02/04/2026</td>
+                  <td>28 500 FCFA</td>
+                  <td><span class="illeto-pill" style="background: rgba(45, 212, 191, 0.10);">Payée</span></td>
+                  <td>
+                    <a href="#" class="btn btn-outline-secondary btn-sm w-100" data-il-download="pdf" data-il-download-label="FAC-2026-04-01">
+                      Télécharger PDF
+                    </a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 900;">FAC-2026-03-18</td>
+                  <td class="illeto-muted">18/03/2026</td>
+                  <td>14 000 FCFA</td>
+                  <td><span class="illeto-pill" style="background: rgba(255, 255, 255, 0.04); color: rgba(255,255,255,0.86); border-color: rgba(255,255,255,0.10);">Payée</span></td>
+                  <td>
+                    <a href="#" class="btn btn-outline-secondary btn-sm w-100" data-il-download="pdf" data-il-download-label="FAC-2026-03-18">
+                      Télécharger PDF
+                    </a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 900;">FAC-2026-02-26</td>
+                  <td class="illeto-muted">26/02/2026</td>
+                  <td>18 000 FCFA</td>
+                  <td><span class="illeto-pill" style="background: rgba(45, 212, 191, 0.10);">Payée</span></td>
+                  <td>
+                    <a href="#" class="btn btn-outline-secondary btn-sm w-100" data-il-download="pdf" data-il-download-label="FAC-2026-02-26">
+                      Télécharger PDF
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div style="height: 40px;"></div>
+
+      
+    </div>
+{% endblock %}

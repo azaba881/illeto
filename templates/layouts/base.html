@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Illeto{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Plateforme SIG de référence pour le Bénin — données administratives, environnementales et infrastructurelles.{% endblock %}" />
+    <meta name="theme-color" content="#03050C" />
+    <link rel="icon" href="{% static 'assets/images/favicon.png' %}" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&amp;family=Roboto+Mono:wght@400;500&amp;display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{% static 'assets/illeto.css' %}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    {% block extra_head %}{% endblock %}
+    <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["Inter", "system-ui", "sans-serif"],
+            serif: ["Playfair Display", "Georgia", "serif"],
+            mono: ["Roboto Mono", "monospace"],
+          },
+          colors: {
+            background: "var(--background)",
+            foreground: "var(--foreground)",
+            card: "var(--card)",
+            "card-foreground": "var(--card-foreground)",
+            popover: "var(--popover)",
+            "popover-foreground": "var(--popover-foreground)",
+            primary: "var(--primary)",
+            "primary-foreground": "var(--primary-foreground)",
+            secondary: "var(--secondary)",
+            "secondary-foreground": "var(--secondary-foreground)",
+            muted: "var(--muted)",
+            "muted-foreground": "var(--muted-foreground)",
+            accent: "var(--accent)",
+            "accent-foreground": "var(--accent-foreground)",
+            destructive: "var(--destructive)",
+            "destructive-foreground": "var(--destructive-foreground)",
+            border: "var(--border)",
+            input: "var(--input)",
+            ring: "var(--ring)",
+            orange: "var(--orange)",
+            "slate-deep": "var(--slate-deep)",
+            "glass-border": "var(--glass-border)",
+          },
+          borderRadius: {
+            lg: "var(--radius)",
+            md: "calc(var(--radius) - 2px)",
+            sm: "calc(var(--radius) - 4px)",
+            xl: "calc(var(--radius) + 4px)",
+          },
+        },
+      },
+    };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    {% block extra_css %}{% endblock %}
+</head>
+<body{% block body_attr %} class="min-h-screen text-foreground font-sans antialiased"{% endblock %}>
+{% block site_shell %}
+<div class="min-h-screen main-illeto-surface{% block surface_extra_class %}{% endblock %}">
+    {% block site_header %}{% include "includes/header.html" %}{% endblock %}
+    {% block content %}{% endblock %}
+    {% block site_footer %}{% include "includes/footer.html" %}{% endblock %}
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://unpkg.com/lucide@0.564.0/dist/umd/lucide.min.js"></script>
+<script src="{% static 'assets/js/scripts.js' %}"></script>
+{% endblock %}
+</body>
+</html>

@@ -1,0 +1,149 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+{% block title %}Illeto | À propos{% endblock %}
+{% block content %}
+<main class="pt-28 pb-20">
+      <nav class="site-breadcrumb max-w-7xl mx-auto px-6 lg:px-8 mb-6" aria-label="Fil d'Ariane">
+        <ol class="flex flex-wrap items-center gap-2 text-xs font-mono text-muted-foreground/80">
+          <li><a href="{% url 'website:index' %}" class="hover:text-primary transition-colors">Accueil</a></li>
+          <li aria-hidden="true" class="text-muted-foreground/45">/</li>
+          <li class="text-foreground/90" aria-current="page">À propos</li>
+        </ol>
+      </nav>
+      <section class="max-w-7xl mx-auto px-6 lg:px-8 mb-32">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div>
+            <span class="text-xs font-mono tracking-widest text-primary uppercase mb-4 block">Notre histoire</span>
+            <h1 class="font-serif text-5xl sm:text-6xl leading-tight mb-6">À <span class="italic text-accent">Propos</span></h1>
+            <p class="text-lg text-muted-foreground leading-relaxed mb-6">Illeto est née de la conviction que l'accès aux données géospatiales de qualité est essentiel au développement du Bénin. Notre mission est de démocratiser l'information territoriale.</p>
+            <p class="text-muted-foreground leading-relaxed">Fondée en 2024 par une équipe de géographes, data scientists et ingénieurs passionnés, Illeto combine expertise locale et technologies de pointe pour produire les cartes les plus précises du pays.</p>
+          </div>
+          <div class="relative">
+            <div class="glass-panel rounded-3xl p-8 aspect-square flex items-center justify-center">
+              <svg viewBox="0 0 200 280" class="w-full h-full max-h-80">
+                <defs>
+                  <linearGradient id="beninGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#00875A" stop-opacity="0.6"/>
+                    <stop offset="100%" stop-color="#A67C52" stop-opacity="0.3"/>
+                  </linearGradient>
+                  <filter id="glow">
+                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                    <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                  </filter>
+                </defs>
+                <path d="M 100 20 L 120 25 L 140 40 L 145 60 L 150 80 L 155 100 L 160 120 L 165 140 L 170 160 L 175 180 L 180 200 L 175 220 L 165 240 L 150 255 L 130 260 L 110 258 L 90 255 L 70 250 L 55 240 L 45 220 L 40 200 L 38 180 L 40 160 L 45 140 L 50 120 L 55 100 L 60 80 L 65 60 L 75 40 L 85 25 Z" fill="url(#beninGrad)" stroke="#00875A" stroke-width="2" filter="url(#glow)" class="animate-subtle-pulse"/>
+                <circle cx="115" cy="230" r="4" fill="#A67C52"/>
+                <circle cx="100" cy="180" r="3" fill="#A67C52"/>
+                <circle cx="120" cy="120" r="3" fill="#A67C52"/>
+                <circle cx="90" cy="60" r="3" fill="#A67C52"/>
+                <text x="10" y="270" fill="oklch(0.5 0.02 260)" font-size="8" font-family="monospace">6.37°N, 2.44°E</text>
+              </svg>
+            </div>
+            <div class="absolute -bottom-6 -left-6 glass-panel rounded-xl p-4">
+              <div class="text-2xl font-serif text-primary">112,622</div>
+              <div class="text-xs font-mono text-muted-foreground">km² couverts</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="max-w-7xl mx-auto px-6 lg:px-8 mb-32">
+        <div class="text-center mb-16">
+          <span class="text-xs font-mono tracking-widest text-primary uppercase mb-4 block">Nos valeurs</span>
+          <h2 class="font-serif text-4xl sm:text-5xl">Ce qui nous <span class="italic text-accent">guide</span></h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div class="glass-panel rounded-2xl p-8 text-center card-lift" style="animation-delay: 0ms">
+            <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-6"><i data-lucide="target" class="w-6 h-6"></i></div>
+            <h3 class="font-serif text-xl mb-3">Précision</h3>
+            <p class="text-sm text-muted-foreground leading-relaxed">Données vectorielles de haute précision, vérifiées et validées par des experts terrain.</p>
+          </div>
+          <div class="glass-panel rounded-2xl p-8 text-center card-lift" style="animation-delay: 100ms">
+            <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-6"><i data-lucide="eye" class="w-6 h-6"></i></div>
+            <h3 class="font-serif text-xl mb-3">Transparence</h3>
+            <p class="text-sm text-muted-foreground leading-relaxed">Méthodologies documentées, sources traçables et mises à jour régulières.</p>
+          </div>
+          <div class="glass-panel rounded-2xl p-8 text-center card-lift" style="animation-delay: 200ms">
+            <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-6"><i data-lucide="heart" class="w-6 h-6"></i></div>
+            <h3 class="font-serif text-xl mb-3">Engagement</h3>
+            <p class="text-sm text-muted-foreground leading-relaxed">Contribuer au développement durable du Bénin par l'accès aux données géospatiales.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="max-w-7xl mx-auto px-6 lg:px-8 mb-32">
+        <div class="glass-panel rounded-3xl p-12">
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="text-center">
+              <div class="font-serif text-4xl lg:text-5xl text-primary mb-2">77</div>
+              <div class="text-sm font-mono text-muted-foreground">Communes cartographiées</div>
+            </div>
+            <div class="text-center">
+              <div class="font-serif text-4xl lg:text-5xl text-primary mb-2">+5000</div>
+              <div class="text-sm font-mono text-muted-foreground">Quartiers référencés</div>
+            </div>
+            <div class="text-center">
+              <div class="font-serif text-4xl lg:text-5xl text-primary mb-2">99.8%</div>
+              <div class="text-sm font-mono text-muted-foreground">Précision vectorielle</div>
+            </div>
+            <div class="text-center">
+              <div class="font-serif text-4xl lg:text-5xl text-primary mb-2">24/7</div>
+              <div class="text-sm font-mono text-muted-foreground">Accès aux données</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="max-w-7xl mx-auto px-6 lg:px-8 mb-32">
+        <div class="text-center mb-16">
+          <span class="text-xs font-mono tracking-widest text-primary uppercase mb-4 block">L'équipe</span>
+          <h2 class="font-serif text-4xl sm:text-5xl">Les <span class="italic text-accent">experts</span> derrière Illeto</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div class="glass-panel rounded-2xl p-8 text-center group card-lift">
+            <div class="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 mx-auto mb-6 flex items-center justify-center"><i data-lucide="users" class="w-8 h-8 text-primary"></i></div>
+            <h3 class="font-serif text-lg mb-1 group-hover:text-primary transition-colors">Dr. Kossi Amouzou</h3>
+            <p class="text-sm text-accent mb-2">Directeur Scientifique</p>
+            <p class="text-xs font-mono text-muted-foreground">SIG &amp; Télédétection</p>
+          </div>
+          <div class="glass-panel rounded-2xl p-8 text-center group card-lift">
+            <div class="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 mx-auto mb-6 flex items-center justify-center"><i data-lucide="users" class="w-8 h-8 text-primary"></i></div>
+            <h3 class="font-serif text-lg mb-1 group-hover:text-primary transition-colors">Aïcha Hounkpatin</h3>
+            <p class="text-sm text-accent mb-2">Lead Cartographe</p>
+            <p class="text-xs font-mono text-muted-foreground">Analyse Spatiale</p>
+          </div>
+          <div class="glass-panel rounded-2xl p-8 text-center group card-lift">
+            <div class="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 mx-auto mb-6 flex items-center justify-center"><i data-lucide="users" class="w-8 h-8 text-primary"></i></div>
+            <h3 class="font-serif text-lg mb-1 group-hover:text-primary transition-colors">Emmanuel Dossou</h3>
+            <p class="text-sm text-accent mb-2">Ingénieur Données</p>
+            <p class="text-xs font-mono text-muted-foreground">Infrastructure Data</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="max-w-7xl mx-auto px-6 lg:px-8 mb-32">
+        <div class="text-center mb-12">
+          <span class="text-xs font-mono tracking-widest text-muted-foreground uppercase">Ils nous font confiance</span>
+        </div>
+        <div class="flex flex-wrap justify-center items-center gap-12 opacity-50">
+          <div class="flex items-center gap-2 text-muted-foreground"><i data-lucide="globe" class="w-5 h-5"></i><span class="font-mono text-sm">IGN Bénin</span></div>
+          <div class="flex items-center gap-2 text-muted-foreground"><i data-lucide="globe" class="w-5 h-5"></i><span class="font-mono text-sm">INSAE</span></div>
+          <div class="flex items-center gap-2 text-muted-foreground"><i data-lucide="globe" class="w-5 h-5"></i><span class="font-mono text-sm">Ministère du Cadre de Vie</span></div>
+          <div class="flex items-center gap-2 text-muted-foreground"><i data-lucide="globe" class="w-5 h-5"></i><span class="font-mono text-sm">GIZ</span></div>
+          <div class="flex items-center gap-2 text-muted-foreground"><i data-lucide="globe" class="w-5 h-5"></i><span class="font-mono text-sm">AFD</span></div>
+        </div>
+      </section>
+
+      <section class="max-w-7xl mx-auto px-6 lg:px-8 text-center">
+        <div class="glass-panel rounded-3xl p-12">
+          <i data-lucide="award" class="w-12 h-12 text-primary mx-auto mb-6"></i>
+          <h2 class="font-serif text-3xl mb-4">Rejoignez l'aventure</h2>
+          <p class="text-muted-foreground mb-8 max-w-xl mx-auto">Que vous soyez chercheur, développeur ou décideur, Illeto met à votre disposition des données de qualité.</p>
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="{% url 'website:atlas' %}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors emerald-glow">Explorer l'Atlas<i data-lucide="arrow-right" class="w-4 h-4"></i></a>
+            <a href="{% url 'website:contact' %}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-border/50 text-foreground font-medium hover:bg-secondary/50 transition-colors">Nous contacter</a>
+          </div>
+        </div>
+      </section>
+    </main>
+{% endblock %}

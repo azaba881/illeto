@@ -1,0 +1,81 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block title %}Connexion | Illeto{% endblock %}
+{% block meta_description %}Connectez-vous à Illeto pour accéder à l’Atlas.{% endblock %}
+
+{% block body_attr %} class="min-h-screen text-foreground font-sans antialiased bg-[#03050c]"{% endblock %}
+{% block surface_extra_class %} flex flex-col{% endblock %}
+
+{% block content %}
+    <main class="auth-page flex-1 flex flex-col items-center justify-center px-6 pt-28 pb-16">
+      <div class="auth-card w-full max-w-md rounded-3xl p-8 sm:p-10">
+        <div class="text-center mb-8">
+          <img src="{% static 'assets/images/favicon.png' %}" alt="Illeto" class="w-10 h-10 mx-auto mb-4" style="zoom: 2;">
+          <p class="text-sm text-muted-foreground">Entrez vos identifiants pour ouvrir l’Atlas.</p>
+        </div>
+        <form class="space-y-5" method="post" action="{% url 'accounts:login' %}">
+          {% csrf_token %}
+          {% if form.non_field_errors %}
+            <div class="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive-foreground" role="alert">
+              {{ form.non_field_errors }}
+            </div>
+          {% endif %}
+          <div>
+            <label for="{{ form.username.id_for_label }}" class="block text-xs font-mono uppercase tracking-wider text-muted-foreground mb-2">{{ form.username.label }}</label>
+            {{ form.username }}
+            {% if form.username.errors %}<p class="text-xs text-destructive mt-1">{{ form.username.errors.0 }}</p>{% endif %}
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label for="{{ form.password.id_for_label }}" class="block text-xs font-mono uppercase tracking-wider text-muted-foreground">{{ form.password.label }}</label>
+              <a href="#" class="text-[11px] text-primary/90 hover:underline">Oublié ?</a>
+            </div>
+            <div class="relative">
+              {{ form.password }}
+              <button type="button" id="toggle-login-pass" class="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40" aria-label="Afficher le mot de passe" aria-pressed="false">
+                <i data-lucide="eye" class="w-4 h-4" aria-hidden="true"></i>
+              </button>
+            </div>
+            {% if form.password.errors %}<p class="text-xs text-destructive mt-1">{{ form.password.errors.0 }}</p>{% endif %}
+          </div>
+          <input type="hidden" name="next" value="{{ next }}">
+          <button type="submit" class="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#0A3D36] text-primary-foreground font-medium hover:bg-primary/90 transition-colors emerald-glow">
+            <i data-lucide="log-in" class="w-4 h-4"></i>
+            <span>Se connecter</span>
+          </button>
+        </form>
+        <p class="text-center text-sm text-muted-foreground mt-8">
+          Nouveau sur Illeto ? <a href="{% url 'accounts:register' %}" class="text-primary font-medium hover:underline">Créer un compte</a>
+        </p>
+      </div>
+      <p class="mt-10 text-xs text-muted-foreground/60 font-mono">
+        <a href="{% url 'website:index' %}" class="hover:text-primary transition-colors">← Retour à l’accueil</a>
+      </p>
+    </main>
+{% endblock %}
+
+{% block site_footer %}{% include "includes/footer_auth.html" %}{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+(function () {
+  function wireToggle(btnId, inputId) {
+    var btn = document.getElementById(btnId);
+    var input = document.getElementById(inputId);
+    if (!btn || !input) return;
+    btn.addEventListener("click", function () {
+      var show = input.type === "password";
+      input.type = show ? "text" : "password";
+      btn.setAttribute("aria-pressed", show ? "true" : "false");
+      btn.setAttribute("aria-label", show ? "Masquer le mot de passe" : "Afficher le mot de passe");
+      var icon = btn.querySelector("[data-lucide]");
+      if (icon) icon.setAttribute("data-lucide", show ? "eye-off" : "eye");
+      if (window.lucide && typeof lucide.createIcons === "function") lucide.createIcons();
+    });
+  }
+  wireToggle("toggle-login-pass", "login-pass");
+})();
+</script>
+{% endblock %}

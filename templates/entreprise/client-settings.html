@@ -1,0 +1,101 @@
+{% extends "layouts/dashboard_base.html" %}
+{% load static %}
+{% block dashboard_title %}Paramètres - Illeto{% endblock %}
+{% block dashboard_content %}
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="d-flex justify-content-between align-items-center mb-4 gap-3 flex-wrap">
+            <div>
+              <h1 class="fs-3 mb-1" style="font-weight: 950;">Paramètres</h1>
+              <p class="mb-0 illeto-muted">Mettez à jour vos informations et changez votre mot de passe.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-12">
+          <div class="card illeto-card">
+            <div class="card-body p-4">
+              <h2 style="font-weight: 1000; font-size: 1.15rem; margin-bottom: 6px;">Commune de travail</h2>
+              <p class="small illeto-muted mb-3">
+                Utilisée pour le tableau de bord (statistiques) et comme commune par défaut dans
+                <a href="{% url 'accounts:dashboard_inventory' %}" class="link-light text-decoration-underline">l’inventaire POI</a>.
+              </p>
+              <form method="post" action="{% url 'accounts:dashboard_settings' %}" class="row g-3 align-items-end">
+                {% csrf_token %}
+                <input type="hidden" name="form_action" value="favorite_commune" />
+                <div class="col-12 col-md-8 col-lg-6">
+                  <label class="small illeto-muted fw-bold d-block mb-1">Commune favorite</label>
+                  <select name="favorite_commune_id" class="form-select">
+                    <option value="">— Aucune —</option>
+                    {% for c in commune_choices %}
+                      <option value="{{ c.pk }}" {% if user.favorite_commune_id == c.pk %}selected{% endif %}>{{ c.departement.name }} — {{ c.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-12 col-md-4 col-lg-3">
+                  <button type="submit" class="btn btn-primary">Enregistrer la commune</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-lg-7">
+          <div class="card illeto-card h-100">
+            <div class="card-body p-4">
+              <h2 style="font-weight: 1000; font-size: 1.15rem; margin-bottom: 6px;">Profil</h2>
+              <div class="small illeto-muted" style="margin-bottom: 18px;">
+                Ces informations servent à personnaliser votre espace client.
+              </div>
+
+              <form id="illetoProfileForm" action="{% url 'accounts:dashboard_settings' %}" method="post" class="space-y-4">
+                {% csrf_token %}
+                <div class="row g-3">
+                  {% for field in profile_form %}
+                  <div class="col-12 col-md-6">
+                    <label class="small illeto-muted fw-bold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors }}</div>{% endif %}
+                  </div>
+                  {% endfor %}
+                </div>
+                {% if profile_form.non_field_errors %}
+                <div class="text-danger small">{{ profile_form.non_field_errors }}</div>
+                {% endif %}
+
+                <div class="mt-4 d-flex gap-2 flex-wrap justify-content-end">
+                  <button id="illetoProfileSubmit" class="btn btn-primary" type="submit">
+                    Enregistrer le profil
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-5">
+          <div class="card illeto-card h-100">
+            <div class="card-body p-4">
+              <h2 style="font-weight: 1000; font-size: 1.15rem; margin-bottom: 6px;">Mot de passe</h2>
+              <div class="small illeto-muted" style="margin-bottom: 18px;">
+                Pour votre sécurité, utilisez un mot de passe robuste.
+              </div>
+
+              <p class="small illeto-muted mb-3">
+                La modification du mot de passe s’effectue sur une page sécurisée Django.
+              </p>
+              <a class="btn btn-primary" href="{% url 'accounts:dashboard_password_change' %}">Changer le mot de passe</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="text-center py-4 text-secondary">
+        <p class="mb-0" style="color: rgba(148,163,184,0.74) !important;">
+          © 2026 Illeto. Votre atlas, votre décision.
+        </p>
+      </footer>
+    </div>
+{% endblock %}

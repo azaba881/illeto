@@ -1,0 +1,111 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+{% block title %}Illeto | Devenir partenaire{% endblock %}
+{% block content %}
+
+<style>
+  input, select, textarea {
+    background-color: rgba(8, 13, 24, 0.75) !important;
+    border-color: rgba(45, 212, 191, 0.15) !important;
+    color: oklch(0.95 0.02 95) !important;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: rgba(45, 212, 191, 0.45) !important;
+    box-shadow: 0 0 0 1px rgba(45, 212, 191, 0.2) !important;
+  }
+</style>
+<main class="pt-28 pb-24">
+      <nav class="site-breadcrumb max-w-7xl mx-auto px-6 lg:px-8 mb-8" aria-label="Fil d'Ariane">
+        <ol class="flex flex-wrap items-center gap-2 text-xs font-mono text-muted-foreground/80">
+          <li><a href="{% url 'website:index' %}" class="hover:text-primary transition-colors">Accueil</a></li>
+          <li aria-hidden="true" class="text-muted-foreground/45">/</li>
+          <li class="text-foreground/90" aria-current="page">Devenir partenaire</li>
+        </ol>
+      </nav>
+
+      <section class="max-w-7xl mx-auto px-6 lg:px-8 mb-16 lg:mb-20">
+        <div class="partner-hero relative px-8 py-14 lg:px-14 lg:py-20 overflow-hidden rounded-2xl">
+          <div class="relative z-[1] max-w-3xl">
+            <span class="text-xs font-mono tracking-widest text-primary uppercase mb-4 block">Écosystème Illeto</span>
+            <h1 class="font-serif text-4xl sm:text-5xl lg:text-6xl leading-[1.08] mb-6">Donnez de la <span class="italic text-accent">portée</span> à vos données</h1>
+            <p class="text-lg text-muted-foreground leading-relaxed max-w-2xl mb-8">Institutions, entreprises, chercheurs : associez votre expertise à la plateforme SIG de référence au Bénin — visibilité, intégrations techniques et modèles de collaboration clairs.</p>
+            <div class="flex flex-wrap gap-4">
+              <a href="#candidature-partenaire" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors emerald-glow">Déposer une candidature</a>
+              <a href="{% url 'website:contact' %}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-white/15 text-sm text-foreground/90 hover:border-primary/35 hover:bg-white/[0.04] transition-all">Échanger avec l’équipe</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="max-w-7xl mx-auto px-6 lg:px-8 mb-20 lg:mb-28">
+        <div class="text-center max-w-2xl mx-auto mb-14">
+          <h2 class="font-serif text-3xl sm:text-4xl mb-4">Pourquoi <span class="italic text-accent">nous rejoindre</span> ?</h2>
+          <p class="text-sm text-muted-foreground leading-relaxed">Une gouvernance des données exigeante, des usages réels sur le terrain et une communauté qui grandit avec vous.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
+          <article class="group rounded-2xl border border-emerald-400/10 bg-gradient-to-b from-[rgba(10,61,54,0.25)] to-[rgba(3,5,12,0.4)] p-8 lg:p-10 transition-all duration-300 hover:border-emerald-400/25 hover:-translate-y-1">
+            <div class="w-14 h-14 rounded-2xl bg-primary/15 flex items-center justify-center mb-6 group-hover:bg-primary/25 transition-colors">
+              <i data-lucide="sparkles" class="w-7 h-7 text-primary"></i>
+            </div>
+            <h3 class="font-serif text-xl mb-3">Rayonnement</h3>
+            <p class="text-sm text-muted-foreground leading-relaxed">Votre organisation est associée à une plateforme citée dans les études, les dossiers d’urbanisme et les politiques publiques.</p>
+          </article>
+          <article class="group rounded-2xl border border-emerald-400/10 bg-gradient-to-b from-[rgba(10,61,54,0.25)] to-[rgba(3,5,12,0.4)] p-8 lg:p-10 transition-all duration-300 hover:border-emerald-400/25 hover:-translate-y-1">
+            <div class="w-14 h-14 rounded-2xl bg-primary/15 flex items-center justify-center mb-6 group-hover:bg-primary/25 transition-colors">
+              <i data-lucide="git-merge" class="w-7 h-7 text-primary"></i>
+            </div>
+            <h3 class="font-serif text-xl mb-3">Co-construction</h3>
+            <p class="text-sm text-muted-foreground leading-relaxed">Enrichissement mutuel des jeux de données, feuille de route produit et ateliers techniques avec nos équipes.</p>
+          </article>
+          <article class="group rounded-2xl border border-emerald-400/10 bg-gradient-to-b from-[rgba(10,61,54,0.25)] to-[rgba(3,5,12,0.4)] p-8 lg:p-10 transition-all duration-300 hover:border-emerald-400/25 hover:-translate-y-1">
+            <div class="w-14 h-14 rounded-2xl bg-primary/15 flex items-center justify-center mb-6 group-hover:bg-primary/25 transition-colors">
+              <i data-lucide="shield-check" class="w-7 h-7 text-primary"></i>
+            </div>
+            <h3 class="font-serif text-xl mb-3">Confiance</h3>
+            <p class="text-sm text-muted-foreground leading-relaxed">Licences claires, traçabilité des sources et standards ouverts (métadonnées, formats interopérables).</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="candidature-partenaire" class="max-w-7xl mx-auto px-6 lg:px-8 scroll-mt-28">
+        <div class="glass-panel rounded-3xl p-8 lg:p-12 max-w-3xl mx-auto border border-emerald-400/15 shadow-[0_32px_100px_rgba(0,0,0,0.35)]">
+          <div class="text-center mb-10">
+            <h2 class="font-serif text-2xl sm:text-3xl mb-3">Candidater comme partenaire</h2>
+            <p class="text-sm text-muted-foreground max-w-lg mx-auto">Décrivez votre organisation et la collaboration envisagée. L’équipe partenariats répond sous cinq jours ouvrés.</p>
+          </div>
+          <div id="partner-success" class="hidden flex flex-col items-center justify-center py-12 text-center">
+            <div class="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mb-6"><i data-lucide="circle-check" class="w-8 h-8 text-primary"></i></div>
+            <h3 class="font-serif text-xl mb-2">Candidature reçue</h3>
+            <p class="text-sm text-muted-foreground">Merci — nous revenons vers vous très prochainement.</p>
+          </div>
+          <form id="partner-form" class="space-y-6">
+            <div>
+              <label for="partner-name" class="block text-sm font-medium mb-2">Nom complet</label>
+              <input type="text" id="partner-name" name="name" required class="w-full px-4 py-3 rounded-xl bg-input border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" placeholder="Prénom et nom" />
+            </div>
+            <div>
+              <label for="partner-org" class="block text-sm font-medium mb-2">Organisation</label>
+              <input type="text" id="partner-org" name="organization" required class="w-full px-4 py-3 rounded-xl bg-input border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" placeholder="Ministère, université, entreprise…" />
+            </div>
+            <div>
+              <label for="partner-type" class="block text-sm font-medium mb-2">Type de partenariat</label>
+              <select id="partner-type" name="partnership_type" required class="w-full px-4 py-3 rounded-xl bg-input border border-border/50 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all appearance-none cursor-pointer">
+                <option value="" class="bg-background">Choisir…</option>
+                <option value="data_provider" class="bg-background">Fournisseur de données</option>
+                <option value="tech_partner" class="bg-background">Partenaire technique</option>
+                <option value="sponsor" class="bg-background">Mécénat / sponsor</option>
+              </select>
+            </div>
+            <div>
+              <label for="partner-message" class="block text-sm font-medium mb-2">Message (optionnel)</label>
+              <textarea id="partner-message" name="message" rows="4" class="w-full px-4 py-3 rounded-xl bg-input border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none" placeholder="Objectifs, volumes de données, délais…"></textarea>
+            </div>
+            <button type="submit" id="partner-submit" class="partner-submit-btn w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 disabled:opacity-50 transition-all emerald-glow">
+              <i data-lucide="send" class="w-5 h-5"></i>
+              Envoyer la candidature
+            </button>
+          </form>
+        </div>
+      </section>
+    </main>
+{% endblock %}

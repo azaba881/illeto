@@ -1,0 +1,14 @@
+{% extends "layouts/dashboard_base.html" %}
+{% load static %}
+{% block dashboard_title %}Espace Entreprise - Illeto{% endblock %}
+{% block dashboard_content %}
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <h1 class="fs-3 mb-2" style="font-weight: 950;">Espace Entreprise</h1>
+          <p class="illeto-muted mb-4">Accédez à la boutique et aux ressources dédiées aux organisations.</p>
+          <a class="btn btn-primary" href="{% url 'accounts:dashboard_store' %}">Ouvrir la boutique</a>
+        </div>
+      </div>
+    </div>
+{% endblock %}

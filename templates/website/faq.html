@@ -1,0 +1,54 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+{% block title %}Illeto | FAQ{% endblock %}
+{% block content %}
+<main class="pt-28 pb-20">
+      <nav class="site-breadcrumb max-w-7xl mx-auto px-6 lg:px-8 mb-8" aria-label="Fil d'Ariane">
+        <ol class="flex flex-wrap items-center gap-2 text-xs font-mono text-muted-foreground/80">
+          <li><a href="{% url 'website:index' %}" class="hover:text-primary transition-colors">Accueil</a></li>
+          <li aria-hidden="true" class="text-muted-foreground/45">/</li>
+          <li class="text-foreground/90" aria-current="page">FAQ</li>
+        </ol>
+      </nav>
+      <section class="max-w-7xl mx-auto px-6 lg:px-8 mb-14">
+        <span class="text-xs font-mono tracking-widest text-primary uppercase mb-4 block">Aide</span>
+        <h1 class="font-serif text-4xl sm:text-5xl lg:text-6xl leading-tight mb-4">Questions <span class="italic text-accent">fréquentes</span></h1>
+        <p class="max-w-2xl text-muted-foreground leading-relaxed">Réponses courtes sur l’Atlas, les données, les comptes et la facturation. Pour un cas précis, <a href="{% url 'website:contact' %}" class="text-primary hover:underline">écrivez-nous</a>.</p>
+      </section>
+
+      <section class="max-w-3xl mx-auto px-6 lg:px-8 space-y-4 pb-8">
+        <details class="faq-details group">
+          <summary>Qu’est-ce qu’Illeto ?</summary>
+          <div class="faq-answer">Illeto est une plateforme SIG qui centralise des données administratives, environnementales et d’infrastructure sur le territoire béninois, du département au quartier lorsque les jeux le permettent.</div>
+        </details>
+        <details class="faq-details">
+          <summary>Comment accéder à l’Atlas ?</summary>
+          <div class="faq-answer">Créez un compte ou connectez-vous, puis ouvrez l’explorateur Atlas depuis le menu. Selon votre offre, certaines couches ou exports peuvent être restreints.</div>
+        </details>
+        <details class="faq-details">
+          <summary>Les données sont-elles officielles ?</summary>
+          <div class="faq-answer">Nous agrégeons et harmonisons des sources publiques et partenaires ; chaque couche est documentée (métadonnées, date de mise à jour). En cas de doute pour un usage juridique, vérifiez la fiche source ou contactez-nous.</div>
+        </details>
+        <details class="faq-details">
+          <summary>Puis-je exporter des cartes ?</summary>
+          <div class="faq-answer">Oui, selon votre formule : l’offre gratuite permet une consultation limitée ; l’offre Expert inclut des exports haute résolution et métadonnées détaillées.</div>
+        </details>
+        <details class="faq-details">
+          <summary>Proposez-vous une API ?</summary>
+          <div class="faq-answer">Des accès API et intégrations sur mesure sont disponibles pour les partenaires institutionnels et l’offre Entreprise. Demandez une étude via la page contact ou partenaire.</div>
+        </details>
+        <details class="faq-details">
+          <summary>Comment devenir partenaire ou fournisseur de données ?</summary>
+          <div class="faq-answer">Remplissez le formulaire sur la page <a href="{% url 'website:partenaire' %}" class="text-primary hover:underline">Devenir partenaire</a>. Notre équipe vous répond sous cinq jours ouvrés.</div>
+        </details>
+        <details class="faq-details">
+          <summary>Comment réinitialiser mon mot de passe ?</summary>
+          <div class="faq-answer">Sur l’écran de connexion, utilisez le lien « Mot de passe oublié » (disponible lorsque la fonctionnalité est activée). En cas de blocage, écrivez à support@illeto.bj.</div>
+        </details>
+        <details class="faq-details">
+          <summary>Où sont hébergées les données ?</summary>
+          <div class="faq-answer">L’infrastructure est conçue pour respecter les bonnes pratiques de sécurité et de localisation adaptées à nos utilisateurs ; les détails contractuels sont précisés pour les offres entreprise.</div>
+        </details>
+      </section>
+    </main>
+{% endblock %}

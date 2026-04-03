@@ -1,0 +1,714 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+{% block title %}Illeto | Visualiser le territoire{% endblock %}
+{% block content %}
+    <main>
+      <section id="hero-section" class="hero-command-deck relative min-h-screen flex flex-col items-center justify-center px-6 overflow-x-clip overflow-y-visible isolate pb-28 md:pb-36">
+        <!-- L1: Base void -->
+        <div class="hero-layer-void absolute inset-0 z-0" aria-hidden="true"></div>
+
+        <!-- L2: Digital skeleton (SVG) — parallax via #hero-skeleton-layer -->
+        <div id="hero-skeleton-layer" class="hero-skeleton-parallax absolute inset-0 z-[1] pointer-events-none flex items-center justify-center py-10 md:py-14 transition-transform duration-300 ease-out will-change-transform" style="transform: translate(20px, 0px);" aria-hidden="true">
+          <div class="hero-skeleton-map-frame">
+          <svg class="hero-skeleton-svg opacity-[0.88]" viewBox="0 0 1000 1280" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="hero-skel-soft" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="0.35" result="b"/>
+                <feMerge>
+                  <feMergeNode in="b"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+            <g fill="none" stroke="#0A3D36" stroke-width="0.5px" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" filter="url(#hero-skel-soft)">
+              <!-- Territorial outline (stylized Benin) -->
+              <path d="M 512 72 L 638 98 L 712 168 L 752 258 L 778 368 L 798 488 L 808 598 L 802 718 L 772 838 L 718 952 L 632 1048 L 518 1108 L 398 1092 L 292 1012 L 218 898 L 178 772 L 168 642 L 182 512 L 222 388 L 292 268 L 388 168 Z"/>
+              <!-- Topological web — internal mesh -->
+              <path d="M 512 72 L 498 320 L 512 640 L 518 928 M 638 98 L 498 320 L 352 488 M 712 168 L 620 420 L 498 320 M 752 258 L 620 420 L 688 640 M 778 368 L 688 640 L 798 488 M 798 488 L 688 640 L 718 952 M 808 598 L 688 640 L 632 1048 M 802 718 L 688 640 L 518 928 M 772 838 L 632 1048 L 518 928 M 718 952 L 518 928 L 398 1092 M 632 1048 L 518 928 L 292 1012 M 518 1108 L 518 928 L 218 898 M 398 1092 L 292 1012 L 182 512 M 292 1012 L 218 898 L 168 642 M 218 898 L 178 772 L 182 512 M 168 642 L 182 512 L 222 388 M 182 512 L 292 268 L 388 168 M 222 388 L 388 168 L 512 72 M 292 268 L 498 320 L 638 98 M 388 168 L 512 72 L 638 98 M 352 488 L 420 720 L 518 928 M 620 420 L 455 580 L 352 488 M 688 640 L 565 780 L 420 720 M 455 580 L 565 780 L 688 640"/>
+              <!-- Sous-maille — segments et intersections supplémentaires (style “polygone par polygone”) -->
+              <path d="
+                M 470 140 L 585 175 L 672 255 L 735 340
+                M 335 280 L 445 235 L 575 265 L 668 355
+                M 265 420 L 395 365 L 525 395 L 642 475
+                M 245 560 L 368 505 L 505 535 L 615 615
+                M 268 720 L 388 665 L 532 695 L 598 785
+                M 318 880 L 448 825 L 538 855 L 572 965
+                M 448 118 L 448 280 L 455 450 L 462 620 L 468 820
+                M 578 130 L 565 300 L 572 480 L 578 680 L 585 880
+                M 672 220 L 598 380 L 605 540 L 612 720 L 625 900
+                M 358 180 L 532 220 L 498 380 L 465 540 L 432 720 L 405 900
+                M 238 480 L 352 580 L 518 620 L 598 520 L 652 640
+                M 198 640 L 312 740 L 488 780 L 552 680 L 618 800
+                M 288 820 L 382 920 L 518 960 L 598 860
+                M 505 195 L 532 420 L 548 640 L 555 850
+                M 412 298 L 588 338 L 565 520 L 542 720 L 525 905
+                M 322 398 L 455 450 L 618 410 L 642 590 L 615 770
+                M 352 588 L 518 648 L 672 598 L 688 738 L 652 888
+                M 185 538 L 268 668 L 358 758 L 455 828 L 288 912
+                M 738 288 L 688 448 L 725 608 L 698 768 L 672 928
+                M 598 168 L 652 298 L 718 398 L 765 518 L 788 648"/>
+            </g>
+            <!-- Nœuds hors flou pour rester nets à l’échelle -->
+            <g class="hero-skel-nodes" fill="#0A3D36" opacity="0.92">
+              <circle cx="498" cy="320" r="1.85"/>
+              <circle cx="688" cy="640" r="1.85"/>
+              <circle cx="518" cy="928" r="1.85"/>
+              <circle cx="632" cy="1048" r="1.45"/>
+              <circle cx="292" cy="1012" r="1.45"/>
+              <circle cx="352" cy="488" r="1.35"/>
+              <circle cx="620" cy="420" r="1.35"/>
+              <circle cx="455" cy="580" r="1.35"/>
+              <circle cx="565" cy="780" r="1.35"/>
+              <circle cx="420" cy="720" r="1.35"/>
+              <circle cx="512" cy="640" r="1.25"/>
+              <circle cx="182" cy="512" r="1.25"/>
+              <circle cx="292" cy="268" r="1.2"/>
+              <circle cx="388" cy="168" r="1.2"/>
+              <circle cx="638" cy="98" r="1.2"/>
+              <circle cx="448" cy="280" r="1.15"/>
+              <circle cx="448" cy="450" r="1.15"/>
+              <circle cx="572" cy="480" r="1.15"/>
+              <circle cx="532" cy="220" r="1.15"/>
+              <circle cx="498" cy="380" r="1.2"/>
+              <circle cx="518" cy="620" r="1.2"/>
+              <circle cx="352" cy="580" r="1.1"/>
+              <circle cx="618" cy="800" r="1.1"/>
+              <circle cx="588" cy="338" r="1.1"/>
+              <circle cx="672" cy="598" r="1.15"/>
+              <circle cx="268" cy="668" r="1.1"/>
+              <circle cx="725" cy="608" r="1.1"/>
+              <circle cx="335" cy="280" r="1.05"/>
+              <circle cx="525" cy="395" r="1.05"/>
+              <circle cx="505" cy="535" r="1.05"/>
+              <circle cx="532" cy="695" r="1.05"/>
+              <circle cx="468" cy="820" r="1.05"/>
+              <circle cx="612" cy="720" r="1.05"/>
+              <circle cx="218" cy="898" r="1.1"/>
+              <circle cx="718" cy="952" r="1.15"/>
+              <circle cx="798" cy="488" r="1.1"/>
+              <circle cx="472" cy="195" r="1"/>
+              <circle cx="598" cy="520" r="1"/>
+              <circle cx="405" cy="900" r="1"/>
+              <circle cx="738" cy="288" r="1"/>
+            </g>
+          </svg>
+          </div>
+        </div>
+
+        <!-- L2b: Technical grid -->
+        <div class="hero-layer-grid absolute inset-0 z-[2] pointer-events-none" aria-hidden="true"></div>
+
+        <!-- L3: Atmospheric emerald haze (search focal) -->
+        <div class="hero-atmospheric-glow absolute inset-0 z-[2]" aria-hidden="true"></div>
+
+        <!-- L4: Telemetry corners -->
+        <div class="hero-live-corner absolute top-28 left-5 sm:left-8 lg:left-16 z-[5] text-[10px] sm:text-xs text-muted-foreground/50 tracking-wider leading-relaxed">
+          <div class="text-foreground/70">6.370°N</div>
+          <div class="text-foreground/70">2.441°E</div>
+          <div class="mt-3 text-[9px] uppercase tracking-widest text-muted-foreground/35">WGS84</div>
+        </div>
+        <div class="hero-live-corner absolute top-28 right-5 sm:right-8 lg:right-16 z-[5] text-[10px] sm:text-xs text-muted-foreground/50 tracking-wider text-right hidden sm:block">
+          <div class="text-foreground/50 uppercase tracking-widest text-[9px]">Signal</div>
+          <div class="text-primary/90 font-medium">VERROUILLÉ</div>
+        </div>
+        <div class="hero-live-corner absolute bottom-36 right-5 sm:right-8 lg:right-20 z-[5] text-[10px] sm:text-xs text-muted-foreground/45 tracking-wider text-right">
+          <div class="uppercase tracking-widest text-[9px] text-muted-foreground/40">Précision vectorielle</div>
+          <div class="text-primary text-sm font-medium tracking-tight">99.8%</div>
+        </div>
+
+        <div class="relative z-10 w-full max-w-4xl mx-auto text-center pt-16">
+          <div class="mb-8 overflow-hidden">
+            <div class="animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel text-xs font-mono tracking-widest text-muted-foreground uppercase border border-white/5">
+                <span class="w-2 h-2 rounded-full bg-primary animate-subtle-pulse"></span>
+                Plateforme SIG de référence
+              </span>
+            </div>
+          </div>
+          <h1 class="mb-8 overflow-hidden">
+            <span class="block font-serif text-5xl sm:text-6xl lg:text-7xl xl:text-8xl leading-[1.1] text-balance text-white animate-in fade-in slide-in-from-bottom-6 duration-700 delay-150">
+              Découvrez le Bénin,<br />
+              <span class="italic" style="background: linear-gradient(135deg, #2dd4bf 0%, #A67C52 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">carte par carte.</span>
+            </span>
+          </h1>
+          <p class="max-w-2xl mx-auto mb-12 text-base sm:text-lg font-sans text-muted-foreground/90 leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
+            Données administratives, environnementales et d'infrastructure haute précision pour les professionnels et la recherche — du département au quartier.
+          </p>
+          <div class="animate-in fade-in slide-in-from-bottom-10 duration-700 delay-500">
+            <div class="relative max-w-2xl mx-auto">
+              <div id="hero-search-wrap" class="hero-search-glass relative glass-panel rounded-2xl overflow-hidden transition-all duration-500">
+                <div class="flex items-center px-6 py-5">
+                  <i data-lucide="search" class="w-5 h-5 text-teal-400/70 mr-4 flex-shrink-0"></i>
+                  <input id="hero-search-input" type="text" class="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground/50 text-base focus:outline-none font-mono" placeholder="" autocomplete="off" />
+                </div>
+                <div class="absolute inset-0 animate-shimmer pointer-events-none opacity-40"></div>
+              </div>
+              <div class="mt-5 flex flex-col sm:flex-row sm:items-center sm:justify-center gap-3 sm:gap-6">
+                <span class="text-xs font-sans font-semibold text-foreground/90 tracking-wide">Données en direct</span>
+                <div class="flex flex-wrap justify-center gap-2">
+                  <button type="button" data-hero-suggest="Cotonou" class="px-3 py-1.5 rounded-full text-xs font-mono text-muted-foreground hover:text-foreground hover:bg-white/5 border border-transparent hover:border-white/10 transition-all duration-300">Cotonou</button>
+                  <button type="button" data-hero-suggest="Zone inondable" class="px-3 py-1.5 rounded-full text-xs font-mono text-muted-foreground hover:text-foreground hover:bg-white/5 border border-transparent hover:border-white/10 transition-all duration-300">Zone inondable</button>
+                  <button type="button" data-hero-suggest="Agla" class="px-3 py-1.5 rounded-full text-xs font-mono text-muted-foreground hover:text-foreground hover:bg-white/5 border border-transparent hover:border-white/10 transition-all duration-300">Agla</button>
+                  <button type="button" data-hero-suggest="Ouémé" class="px-3 py-1.5 rounded-full text-xs font-mono text-muted-foreground hover:text-foreground hover:bg-white/5 border border-transparent hover:border-white/10 transition-all duration-300">Ouémé</button>
+                </div>
+              </div>
+              <div class="hero-live-ticker mt-5 rounded-xl border px-0 py-2.5">
+                <div class="hero-live-ticker__viewport">
+                  <div class="hero-live-ticker__track font-mono text-[10px] sm:text-[11px] text-muted-foreground/70">
+                    <span class="hero-live-ticker__group">
+                      <span class="hero-live-ticker__segment">COORDS: 6.3729°N 2.4251°E | SECTOR: Littoral | NEIGHBORHOOD: Cadjèhoun | STATUS: OK</span>
+                      <span class="hero-live-ticker__segment">COORDS: 6.4969°N 2.6036°E | SECTOR: Ouémé | NEIGHBORHOOD: Tokplègbé | STATUS: SCAN</span>
+                      <span class="hero-live-ticker__segment">COORDS: 6.3654°N 2.4183°E | SECTOR: Atlantique | NEIGHBORHOOD: Agla | STATUS: LIVE</span>
+                      <span class="hero-live-ticker__segment">COORDS: 9.3373°N 2.6303°E | SECTOR: Borgou | NODE: Parakou | STATUS: ROUTE</span>
+                    </span>
+                    <span class="hero-live-ticker__group" aria-hidden="true">
+                      <span class="hero-live-ticker__segment">COORDS: 6.3729°N 2.4251°E | SECTOR: Littoral | NEIGHBORHOOD: Cadjèhoun | STATUS: OK</span>
+                      <span class="hero-live-ticker__segment">COORDS: 6.4969°N 2.6036°E | SECTOR: Ouémé | NEIGHBORHOOD: Tokplègbé | STATUS: SCAN</span>
+                      <span class="hero-live-ticker__segment">COORDS: 6.3654°N 2.4183°E | SECTOR: Atlantique | NEIGHBORHOOD: Agla | STATUS: LIVE</span>
+                      <span class="hero-live-ticker__segment">COORDS: 9.3373°N 2.6303°E | SECTOR: Borgou | NODE: Parakou | STATUS: ROUTE</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="hero-bottom-stack absolute inset-x-0 bottom-0 z-[8] flex flex-col items-center justify-end pb-0">
+          <div class="hero-bottom-stack__inner w-full max-w-5xl px-4 flex flex-col items-center">
+            <!-- <div class="flex flex-col items-center gap-2 text-muted-foreground/50 pb-2 md:pb-3">
+              <a href=""></a><span class="text-xs font-mono tracking-widest uppercase" style="width: white;">Défiler</span></
+              <a href=""><i data-lucide="chevron-down" class="w-4 h-4 animate-float"></i></a>
+            </div> -->
+            <div class="hero-demo-card-shell w-[82%] sm:w-[88%] min-w-[min(100%,300px)] max-w-6xl relative z-[1]">
+              <a href="{% url 'website:atlas' %}" class="hero-demo-card hero-demo-card--media-only group block rounded-2xl overflow-hidden transition-all duration-300 hover:border-emerald-400/35 hover:-translate-y-0.5">
+                <img src="{% static 'assets/images/banner-index.png' %}" alt="Aperçu carte — Atlas Illeto" class="hero-demo-card__img w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" width="1400" height="600" loading="eager" decoding="async" />
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="hero-section-wave-wrap absolute bottom-0 left-0 right-0 z-[6] pointer-events-none leading-[0]" aria-hidden="true">
+          <svg class="hero-section-wave" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true">
+            <defs>
+              <!-- Couleurs .main-illeto-surface + halo type bannière (radial teal + linear 8,13,24 → 3,5,12) -->
+              <linearGradient id="heroWaveFill" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="38%" stop-color="#03050c"/>
+                <stop offset="100%" stop-color="#03050c"/>
+              </linearGradient>
+              <linearGradient id="heroWaveStroke" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="rgba(148, 163, 184, 0.12)"/>
+                <stop offset="50%" stop-color="rgba(45, 212, 191, 0.28)"/>
+                <stop offset="100%" stop-color="rgba(148, 163, 184, 0.12)"/>
+              </linearGradient>
+            </defs>
+            <path fill="url(#heroWaveFill)" d="M0,40 C360,90 720,0 1080,40 C1260,60 1380,50 1440,45 L1440,80 L0,80 Z"/>
+            <path fill="none" stroke="url(#heroWaveStroke)" stroke-width="1" d="M0,40 C360,90 720,0 1080,40 C1260,60 1380,50 1440,45"/>
+          </svg>
+        </div>
+      </section>
+
+      <section id="departements" class="section-after-hero-wave relative py-24 px-6 overflow-hidden">
+        <div class="max-w-7xl mx-auto mb-14">
+          <span class="text-xs font-mono tracking-widest text-primary uppercase mb-4 block">Territoire</span>
+          <h2 class="font-serif text-4xl sm:text-5xl lg:text-6xl leading-tight mb-4">Départements <span class="italic text-accent">cartographiés</span></h2>
+          <p class="max-w-2xl text-muted-foreground text-sm leading-relaxed">Couches administratives et thématiques par département — même précision vectorielle que sur l'atlas.</p>
+        </div>
+        <div class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <a href="{% url 'website:cartes' %}" class="geo-card geo-card--split rounded-2xl block relative z-10">
+            <div class="geo-card__media" aria-hidden="true">
+              <img src="{% static 'assets/images/cat/cat-1.png' %}" alt="" width="400" height="400" loading="lazy" decoding="async" />
+            </div>
+            <div class="geo-card__body">
+              <div class="flex items-start justify-between gap-3 mb-3">
+                <span class="font-mono text-[10px] text-primary/80 tracking-widest uppercase">Dép. 12</span>
+                <i data-lucide="map" class="w-5 h-5 text-primary/60 shrink-0"></i>
+              </div>
+              <h3 class="font-serif text-xl text-foreground mb-2">Littoral</h3>
+              <p class="text-sm text-muted-foreground leading-relaxed">Cœur économique, communes côtières et données urbaines fines.</p>
+            </div>
+          </a>
+          <a href="{% url 'website:cartes' %}" class="geo-card geo-card--split rounded-2xl block relative z-10">
+            <div class="geo-card__media" aria-hidden="true">
+              <img src="{% static 'assets/images/cat/cat-2.png' %}" alt="" width="400" height="400" loading="lazy" decoding="async" />
+            </div>
+            <div class="geo-card__body">
+              <div class="flex items-start justify-between gap-3 mb-3">
+                <span class="font-mono text-[10px] text-primary/80 tracking-widest uppercase">Dép. 09</span>
+                <i data-lucide="map" class="w-5 h-5 text-primary/60 shrink-0"></i>
+              </div>
+              <h3 class="font-serif text-xl text-foreground mb-2">Atlantique</h3>
+              <p class="text-sm text-muted-foreground leading-relaxed">Ouidah, Allada, zones côtières et patrimoine.</p>
+            </div>
+          </a>
+          <a href="{% url 'website:cartes' %}" class="geo-card geo-card--split rounded-2xl block relative z-10">
+            <div class="geo-card__media" aria-hidden="true">
+              <img src="{% static 'assets/images/cat/cat-3.png' %}" alt="" width="400" height="400" loading="lazy" decoding="async" />
+            </div>
+            <div class="geo-card__body">
+              <div class="flex items-start justify-between gap-3 mb-3">
+                <span class="font-mono text-[10px] text-primary/80 tracking-widest uppercase">Dép. 16</span>
+                <i data-lucide="map" class="w-5 h-5 text-primary/60 shrink-0"></i>
+              </div>
+              <h3 class="font-serif text-xl text-foreground mb-2">Ouémé</h3>
+              <p class="text-sm text-muted-foreground leading-relaxed">Porto-Novo, fleuve Ouémé et plaines agricoles.</p>
+            </div>
+          </a>
+          <a href="{% url 'website:cartes' %}" class="geo-card geo-card--split rounded-2xl block relative z-10">
+            <div class="geo-card__media" aria-hidden="true">
+              <img src="{% static 'assets/images/cat/cat-4.png' %}" alt="" width="400" height="400" loading="lazy" decoding="async" />
+            </div>
+            <div class="geo-card__body">
+              <div class="flex items-start justify-between gap-3 mb-3">
+                <span class="font-mono text-[10px] text-primary/80 tracking-widest uppercase">Dép. 07</span>
+                <i data-lucide="map" class="w-5 h-5 text-primary/60 shrink-0"></i>
+              </div>
+              <h3 class="font-serif text-xl text-foreground mb-2">Borgou</h3>
+              <p class="text-sm text-muted-foreground leading-relaxed">Parakou, axes nord–sud et nœuds logistiques.</p>
+            </div>
+          </a>
+          <a href="{% url 'website:cartes' %}" class="geo-card geo-card--split rounded-2xl block relative z-10">
+            <div class="geo-card__media" aria-hidden="true">
+              <img src="{% static 'assets/images/cat/cat-5.png' %}" alt="" width="400" height="400" loading="lazy" decoding="async" />
+            </div>
+            <div class="geo-card__body">
+              <div class="flex items-start justify-between gap-3 mb-3">
+                <span class="font-mono text-[10px] text-primary/80 tracking-widest uppercase">Dép. 01</span>
+                <i data-lucide="map" class="w-5 h-5 text-primary/60 shrink-0"></i>
+              </div>
+              <h3 class="font-serif text-xl text-foreground mb-2">Alibori</h3>
+              <p class="text-sm text-muted-foreground leading-relaxed">Nord du pays, transfrontalier et ressources naturelles.</p>
+            </div>
+          </a>
+          <a href="{% url 'website:cartes' %}" class="geo-card geo-card--split rounded-2xl block relative z-10">
+            <div class="geo-card__media" aria-hidden="true">
+              <img src="{% static 'assets/images/cat/cat-6.png' %}" alt="" width="400" height="400" loading="lazy" decoding="async" />
+            </div>
+            <div class="geo-card__body">
+              <div class="flex items-start justify-between gap-3 mb-3">
+                <span class="font-mono text-[10px] text-primary/80 tracking-widest uppercase">Dép. 18</span>
+                <i data-lucide="map" class="w-5 h-5 text-primary/60 shrink-0"></i>
+              </div>
+              <h3 class="font-serif text-xl text-foreground mb-2">Zou</h3>
+              <p class="text-sm text-muted-foreground leading-relaxed">Abomey, plateau et tissu communal historique.</p>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <section class="relative py-24 px-6 overflow-hidden">
+        <div class="max-w-7xl mx-auto mb-20">
+          <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+            <div>
+              <span class="text-xs font-mono tracking-widest text-primary uppercase mb-4 block">Flux de données</span>
+              <h2 class="font-serif text-4xl sm:text-5xl lg:text-6xl leading-tight">Données à <span class="italic text-accent">haute résolution</span></h2>
+            </div>
+            <p class="max-w-md text-muted-foreground font-mono text-sm leading-relaxed">Trois couches de données structurantes pour les décisions publiques, la recherche et les entreprises sur tout le territoire béninois.</p>
+          </div>
+        </div>
+        <div class="max-w-7xl mx-auto">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div data-showcase-card data-glow="oklch(0.55 0.15 160 / 0.4)" class="group relative" style="animation-delay: 0ms">
+              <div data-showcase-inner class="relative glass-panel rounded-2xl overflow-hidden card-lift">
+                <div class="relative h-48 overflow-hidden bg-slate-deep/50">
+                  <div class="absolute inset-0 flex items-center justify-center p-4">
+                    <svg viewBox="0 0 200 160" class="w-full h-full">
+                      <defs>
+                        <pattern id="adminGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+                          <path d="M 20 0 L 0 0 0 20" fill="none" stroke="oklch(0.55 0.15 160 / 0.1)" stroke-width="0.5"/>
+                        </pattern>
+                        <filter id="adminGlow">
+                          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        </filter>
+                      </defs>
+                      <rect width="200" height="160" fill="url(#adminGrid)"/>
+                      <g filter="url(#adminGlow)">
+                        <path d="M 40 80 L 60 60 L 90 55 L 120 65 L 140 80 L 130 110 L 100 120 L 70 115 L 45 100 Z" fill="oklch(0.55 0.15 160 / 0.3)" stroke="#00875A" stroke-width="2" class="animate-subtle-pulse"/>
+                        <path d="M 90 55 L 120 45 L 150 55 L 140 80 L 120 65 Z" fill="oklch(0.55 0.15 160 / 0.2)" stroke="#00875A" stroke-width="1.5"/>
+                        <path d="M 60 60 L 70 40 L 100 35 L 120 45 L 90 55 Z" fill="oklch(0.55 0.15 160 / 0.25)" stroke="#00875A" stroke-width="1.5"/>
+                      </g>
+                      <circle cx="85" cy="85" r="3" fill="#00875A" class="animate-subtle-pulse"/>
+                      <circle cx="115" cy="60" r="2.5" fill="#00875A"/>
+                      <circle cx="100" cy="45" r="2" fill="#00875A"/>
+                    </svg>
+                  </div>
+                  <div class="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent pointer-events-none"></div>
+                  <div class="absolute top-4 left-4 w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: #00875A20; color: #00875A;">
+                    <i data-lucide="map-pin" class="w-5 h-5"></i>
+                  </div>
+                </div>
+                <div class="p-6">
+                  <h3 class="font-serif text-xl mb-2 group-hover:text-primary transition-colors duration-300">Limites Officielles</h3>
+                  <p class="text-sm text-muted-foreground mb-4 font-mono">Limites administratives en précision vectorielle</p>
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-mono tracking-wide" style="color: #00875A;">77 Communes, +5000 Quartiers</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-300"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div data-showcase-card data-glow="oklch(0.7 0.12 180 / 0.4)" class="group relative" style="animation-delay: 100ms">
+              <div data-showcase-inner class="relative glass-panel rounded-2xl overflow-hidden card-lift">
+                <div class="relative h-48 overflow-hidden bg-slate-deep/50">
+                  <div class="absolute inset-0 flex items-center justify-center p-4">
+                    <svg viewBox="0 0 200 160" class="w-full h-full">
+                      <defs>
+                        <linearGradient id="riverGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stop-color="#4ECDC4" stop-opacity="0.8"/>
+                          <stop offset="100%" stop-color="#4ECDC4" stop-opacity="0.3"/>
+                        </linearGradient>
+                        <filter id="waterGlow">
+                          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        </filter>
+                      </defs>
+                      <g filter="url(#waterGlow)">
+                        <path d="M 20 80 Q 60 70 100 85 T 180 75" fill="none" stroke="url(#riverGradient)" stroke-width="4" class="animate-glow-pulse"/>
+                        <path d="M 100 85 Q 110 60 90 40" fill="none" stroke="#4ECDC4" stroke-width="2" stroke-opacity="0.6"/>
+                        <path d="M 100 85 Q 130 100 140 130" fill="none" stroke="#4ECDC4" stroke-width="2" stroke-opacity="0.5"/>
+                        <path d="M 60 73 Q 70 50 60 30" fill="none" stroke="#4ECDC4" stroke-width="1.5" stroke-opacity="0.4"/>
+                      </g>
+                      <ellipse cx="100" cy="90" rx="40" ry="25" fill="oklch(0.7 0.12 180 / 0.15)" stroke="oklch(0.7 0.12 180 / 0.3)" stroke-width="1" stroke-dasharray="4 2"/>
+                      <ellipse cx="140" cy="100" rx="25" ry="15" fill="oklch(0.7 0.12 180 / 0.1)" stroke="oklch(0.7 0.12 180 / 0.2)" stroke-width="1" stroke-dasharray="4 2"/>
+                      <circle cx="80" cy="95" r="4" fill="oklch(0.55 0.15 160 / 0.5)"/>
+                      <circle cx="120" cy="85" r="3" fill="oklch(0.55 0.15 160 / 0.4)"/>
+                    </svg>
+                  </div>
+                  <div class="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent pointer-events-none"></div>
+                  <div class="absolute top-4 left-4 w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: #4ECDC420; color: #4ECDC4;">
+                    <i data-lucide="droplets" class="w-5 h-5"></i>
+                  </div>
+                </div>
+                <div class="p-6">
+                  <h3 class="font-serif text-xl mb-2 group-hover:text-primary transition-colors duration-300">Zonage Environnemental</h3>
+                  <p class="text-sm text-muted-foreground mb-4 font-mono">Zones inondables, hydrographie, occupation des sols</p>
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-mono tracking-wide" style="color: #4ECDC4;">Inondations, cours d'eau, zonages</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-300"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div data-showcase-card data-glow="oklch(0.55 0.1 55 / 0.4)" class="group relative" style="animation-delay: 200ms">
+              <div data-showcase-inner class="relative glass-panel rounded-2xl overflow-hidden card-lift">
+                <div class="relative h-48 overflow-hidden bg-slate-deep/50">
+                  <div class="absolute inset-0 flex items-center justify-center p-4">
+                    <svg viewBox="0 0 200 160" class="w-full h-full">
+                      <defs>
+                        <filter id="goldGlow">
+                          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        </filter>
+                      </defs>
+                      <g stroke="oklch(0.5 0.02 260)" stroke-width="1" fill="none" opacity="0.4">
+                        <line x1="20" y1="80" x2="180" y2="80"/>
+                        <line x1="100" y1="20" x2="100" y2="140"/>
+                        <line x1="40" y1="40" x2="160" y2="120"/>
+                        <line x1="160" y1="40" x2="40" y2="120"/>
+                      </g>
+                      <g stroke="#A67C52" stroke-width="2" fill="none" opacity="0.8">
+                        <line x1="20" y1="80" x2="180" y2="80"/>
+                        <line x1="100" y1="20" x2="100" y2="140"/>
+                      </g>
+                      <g filter="url(#goldGlow)">
+                        <circle cx="70" cy="60" r="5" fill="#A67C52" class="animate-subtle-pulse"/>
+                        <circle cx="130" cy="100" r="5" fill="#A67C52" class="animate-subtle-pulse"/>
+                        <circle cx="100" cy="80" r="6" fill="#A67C52"/>
+                      </g>
+                      <g stroke="oklch(0.7 0.15 55 / 0.5)" stroke-width="1" stroke-dasharray="6 3">
+                        <line x1="30" y1="50" x2="170" y2="50"/>
+                        <line x1="30" y1="110" x2="170" y2="110"/>
+                      </g>
+                      <rect x="45" y="105" width="8" height="10" fill="#A67C52" opacity="0.7"/>
+                      <rect x="145" y="45" width="8" height="10" fill="#A67C52" opacity="0.7"/>
+                    </svg>
+                  </div>
+                  <div class="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent pointer-events-none"></div>
+                  <div class="absolute top-4 left-4 w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: #A67C5220; color: #A67C52;">
+                    <i data-lucide="zap" class="w-5 h-5"></i>
+                  </div>
+                </div>
+                <div class="p-6">
+                  <h3 class="font-serif text-xl mb-2 group-hover:text-primary transition-colors duration-300">Réseaux &amp; Infrastructures</h3>
+                  <p class="text-sm text-muted-foreground mb-4 font-mono">Infrastructures critiques et données de connectivité</p>
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-mono tracking-wide" style="color: #A67C52;">Énergie, santé, réseau routier</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-300"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="max-w-7xl mx-auto mt-16 text-center">
+          <a href="{% url 'website:atlas' %}" class="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-all duration-300 group emerald-glow">
+            <span>Explorer l'Atlas</span>
+            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+          </a>
+        </div>
+      </section>
+
+      <section id="villes" class="relative py-24 px-6 overflow-hidden">
+        <div class="max-w-7xl mx-auto mb-14">
+          <span class="text-xs font-mono tracking-widest text-primary uppercase mb-4 block">Zoom local</span>
+          <h2 class="font-serif text-4xl sm:text-5xl lg:text-6xl leading-tight mb-4">Villes <span class="italic text-accent">à la maille fine</span></h2>
+          <p class="max-w-2xl text-muted-foreground text-sm leading-relaxed">Quartiers, communes et indicateurs — pour la recherche et l'opérationnel.</p>
+        </div>
+        <div class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <a href="{% url 'website:cartes' %}" class="geo-card geo-card--split rounded-2xl block relative z-10">
+            <div class="geo-card__media" aria-hidden="true">
+              <img src="{% static 'assets/images/cat/cat-8.png' %}" alt="" width="400" height="400" loading="lazy" decoding="async" />
+            </div>
+            <div class="geo-card__body">
+              <div class="flex items-start justify-between gap-3 mb-3">
+                <span class="font-mono text-[10px] text-muted-foreground tracking-wider">6,37°N · 2,43°E</span>
+                <i data-lucide="building-2" class="w-5 h-5 text-primary/60 shrink-0"></i>
+              </div>
+              <h3 class="font-serif text-xl text-foreground mb-2">Cotonou</h3>
+              <p class="text-sm text-muted-foreground leading-relaxed">Capitale économique, littoral et zones inondables modélisées.</p>
+            </div>
+          </a>
+          <a href="{% url 'website:cartes' %}" class="geo-card geo-card--split rounded-2xl block relative z-10">
+            <div class="geo-card__media" aria-hidden="true">
+              <img src="{% static 'assets/images/cat/cat-9.png' %}" alt="" width="400" height="400" loading="lazy" decoding="async" />
+            </div>
+            <div class="geo-card__body">
+              <div class="flex items-start justify-between gap-3 mb-3">
+                <span class="font-mono text-[10px] text-muted-foreground tracking-wider">6,50°N · 2,60°E</span>
+                <i data-lucide="building-2" class="w-5 h-5 text-primary/60 shrink-0"></i>
+              </div>
+              <h3 class="font-serif text-xl text-foreground mb-2">Porto-Novo</h3>
+              <p class="text-sm text-muted-foreground leading-relaxed">Capitale législative et bassin de l'Ouémé.</p>
+            </div>
+          </a>
+          <a href="{% url 'website:cartes' %}" class="geo-card geo-card--split rounded-2xl block relative z-10">
+            <div class="geo-card__media" aria-hidden="true">
+              <img src="{% static 'assets/images/cat/cat-7.png' %}" alt="" width="400" height="400" loading="lazy" decoding="async" />
+            </div>
+            <div class="geo-card__body">
+              <div class="flex items-start justify-between gap-3 mb-3">
+                <span class="font-mono text-[10px] text-muted-foreground tracking-wider">9,34°N · 2,63°E</span>
+                <i data-lucide="building-2" class="w-5 h-5 text-primary/60 shrink-0"></i>
+              </div>
+              <h3 class="font-serif text-xl text-foreground mb-2">Parakou</h3>
+              <p class="text-sm text-muted-foreground leading-relaxed">Hub du nord, corridors et communes périphériques.</p>
+            </div>
+          </a>
+          <a href="{% url 'website:cartes' %}" class="geo-card geo-card--split rounded-2xl block relative z-10">
+            <div class="geo-card__media" aria-hidden="true">
+              <img src="{% static 'assets/images/cat/cat-12.png' %}" alt="" width="400" height="400" loading="lazy" decoding="async" />
+            </div>
+            <div class="geo-card__body">
+              <div class="flex items-start justify-between gap-3 mb-3">
+                <span class="font-mono text-[10px] text-muted-foreground tracking-wider">6,45°N · 2,36°E</span>
+                <i data-lucide="building-2" class="w-5 h-5 text-primary/60 shrink-0"></i>
+              </div>
+              <h3 class="font-serif text-xl text-foreground mb-2">Abomey-Calavi</h3>
+              <p class="text-sm text-muted-foreground leading-relaxed">Pôle universitaire et expansion urbaine.</p>
+            </div>
+          </a>
+          <a href="{% url 'website:cartes' %}" class="geo-card geo-card--split rounded-2xl block relative z-10">
+            <div class="geo-card__media" aria-hidden="true">
+              <img src="{% static 'assets/images/cat/cat-10.png' %}" alt="" width="400" height="400" loading="lazy" decoding="async" />
+            </div>
+            <div class="geo-card__body">
+              <div class="flex items-start justify-between gap-3 mb-3">
+                <span class="font-mono text-[10px] text-muted-foreground tracking-wider">7,18°N · 2,07°E</span>
+                <i data-lucide="building-2" class="w-5 h-5 text-primary/60 shrink-0"></i>
+              </div>
+              <h3 class="font-serif text-xl text-foreground mb-2">Bohicon</h3>
+              <p class="text-sm text-muted-foreground leading-relaxed">Carrefour du Zou et liaisons vers le sud.</p>
+            </div>
+          </a>
+          <a href="{% url 'website:cartes' %}" class="geo-card geo-card--split rounded-2xl block relative z-10">
+            <div class="geo-card__media" aria-hidden="true">
+              <img src="{% static 'assets/images/cat/cat-11.png' %}" alt="" width="400" height="400" loading="lazy" decoding="async" />
+            </div>
+            <div class="geo-card__body">
+              <div class="flex items-start justify-between gap-3 mb-3">
+                <span class="font-mono text-[10px] text-muted-foreground tracking-wider">10,32°N · 1,27°E</span>
+                <i data-lucide="building-2" class="w-5 h-5 text-primary/60 shrink-0"></i>
+              </div>
+              <h3 class="font-serif text-xl text-foreground mb-2">Natitingou</h3>
+              <p class="text-sm text-muted-foreground leading-relaxed">Porte des Atacora et relief du nord-ouest.</p>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <section class="relative py-28 px-6 overflow-hidden">
+        <div class="max-w-7xl mx-auto mb-16 text-center lg:text-left">
+          <span class="text-xs font-mono tracking-widest text-primary uppercase mb-4 block">Cas d'usage</span>
+          <h2 class="font-serif text-4xl sm:text-5xl lg:text-6xl leading-tight mb-4">Où <span class="italic text-accent">Illeto</span> fait la différence</h2>
+          <p class="max-w-2xl mx-auto lg:mx-0 text-muted-foreground font-sans text-base leading-relaxed">Trois mondes professionnels, une même exigence de précision — chaque cas est illustré par un visuel métier.</p>
+        </div>
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-7">
+          <article class="illeto-usecase-card group">
+            <div class="illeto-usecase-media">
+              <img src="{% static 'assets/images/pat/1.png' %}" alt="Gratte-ciel et perspective urbaine" width="900" height="600" loading="lazy" decoding="async" class="opacity-90" />
+              <div class="absolute top-4 left-4 z-[1] w-11 h-11 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-primary">
+                <i data-lucide="building-2" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="p-6 pt-5 relative z-[1]">
+              <h3 class="font-serif text-xl mb-2 text-foreground">Urbanisme</h3>
+              <p class="text-sm text-muted-foreground leading-relaxed">Plans de quartier et dossiers d'aménagement : limites vectorielles et occupation du sol, jusqu'à l'échelle de <span class="text-foreground font-medium">Agla</span>.</p>
+            </div>
+          </article>
+          <article class="illeto-usecase-card group">
+            <div class="illeto-usecase-media">
+              <img src="{% static 'assets/images/pat/2.png' %}" alt="Entrepôt logistique et manutention" width="900" height="600" loading="lazy" decoding="async" class="opacity-90" />
+              <div class="absolute top-4 left-4 z-[1] w-11 h-11 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-primary">
+                <i data-lucide="truck" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="p-6 pt-5 relative z-[1]">
+              <h3 class="font-serif text-xl mb-2 text-foreground">Logistique</h3>
+              <p class="text-sm text-muted-foreground leading-relaxed">Flux et corridors : réseau routier et hubs comme <span class="text-foreground font-medium">Parakou</span>, avec des couches infrastructurelles maintenues.</p>
+            </div>
+          </article>
+          <article class="illeto-usecase-card group">
+            <div class="illeto-usecase-media">
+              <img src="{% static 'assets/images/pat/3.png' %}" alt="Paysage brumeux et forêt" width="900" height="600" loading="lazy" decoding="async" class="opacity-90" />
+              <div class="absolute top-4 left-4 z-[1] w-11 h-11 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-primary">
+                <i data-lucide="leaf" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="p-6 pt-5 relative z-[1]">
+              <h3 class="font-serif text-xl mb-2 text-foreground">Études d'impact</h3>
+              <p class="text-sm text-muted-foreground leading-relaxed">Environnement et EIE : zonages sensibles, hydrographie et métadonnées prêtes pour la recherche et les rapports.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="tarifs" class="section-pricing relative py-28 px-6 overflow-hidden">
+        <div class="relative z-[1] max-w-7xl mx-auto mb-16 text-center">
+          <span class="text-xs font-mono tracking-widest text-primary uppercase mb-4 block">Tarifs</span>
+          <h2 class="font-serif text-4xl sm:text-5xl lg:text-6xl leading-tight mb-4">Une offre pour <span class="italic text-accent">chaque ambition</span></h2>
+          <p class="max-w-xl mx-auto text-muted-foreground text-sm leading-relaxed">Grille claire : découverte gratuite pour l'académique, puissance terrain pour l'Expert, sur mesure pour les institutions.</p>
+        </div>
+        <div class="relative z-[1] max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-5 items-stretch">
+          <div class="pricing-card glow-hover rounded-2xl overflow-hidden flex flex-col h-full">
+            <div class="pricing-card-inner">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-primary"><i data-lucide="graduation-cap" class="w-4 h-4"></i></span>
+                <span class="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Entrée</span>
+              </div>
+              <h3 class="font-serif text-2xl mb-1">Académique</h3>
+              <p class="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-6">Recherche &amp; enseignement</p>
+              <div class="mb-6 pb-6 border-b border-white/10">
+                <span class="font-serif text-4xl text-foreground">0</span>
+                <span class="text-muted-foreground text-sm font-mono ml-1">FCFA / mois</span>
+              </div>
+              <ul class="space-y-3 text-sm text-muted-foreground mb-8 flex-1">
+                <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0 mt-0.5"></i>Lecture Atlas et jeux de données limités</li>
+                <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0 mt-0.5"></i>Citation des sources dans les travaux</li>
+                <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0 mt-0.5"></i>Support communautaire</li>
+              </ul>
+              <a href="{% url 'website:atlas' %}" class="group flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white/5 border border-white/10 hover:border-primary/30 hover:bg-white/[0.07] transition-all duration-300 mt-auto font-medium text-sm">
+                <i data-lucide="log-in" class="w-4 h-4 text-primary"></i>
+                <span>Commencer</span>
+              </a>
+            </div>
+          </div>
+          <div class="pricing-card pricing-card-featured glow-hover rounded-2xl overflow-hidden flex flex-col h-full lg:-mt-2 lg:mb-2 relative">
+            <div class="pricing-card-inner pt-10">
+              <span class="absolute top-4 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-mono uppercase tracking-widest shadow-lg shadow-primary/20 z-10">Le plus populaire</span>
+              <div class="flex items-center gap-2 mb-4">
+                <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary"><i data-lucide="layers" class="w-4 h-4"></i></span>
+                <span class="text-[10px] font-mono uppercase tracking-widest text-primary/90">Pro</span>
+              </div>
+              <h3 class="font-serif text-2xl mb-1">Expert</h3>
+              <p class="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-6">Équipes &amp; terrain</p>
+              <div class="mb-6 pb-6 border-b border-primary/20">
+                <span class="font-serif text-4xl text-foreground">75&nbsp;000</span>
+                <span class="text-muted-foreground text-sm font-mono ml-1">FCFA / mois</span>
+              </div>
+              <ul class="space-y-3 text-sm text-muted-foreground mb-8 flex-1">
+                <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0 mt-0.5"></i>Exports haute résolution et métadonnées</li>
+                <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0 mt-0.5"></i>Couches avancées et historique</li>
+                <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0 mt-0.5"></i>Support prioritaire</li>
+              </ul>
+              <a href="{% url 'website:atlas' %}" class="group flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 mt-auto font-medium text-sm emerald-glow">
+                <span>Souscrire</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform"></i>
+              </a>
+            </div>
+          </div>
+          <div class="pricing-card glow-hover rounded-2xl overflow-hidden flex flex-col h-full">
+            <div class="pricing-card-inner">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-accent"><i data-lucide="landmark" class="w-4 h-4"></i></span>
+                <span class="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Institutionnel</span>
+              </div>
+              <h3 class="font-serif text-2xl mb-1">Entreprise</h3>
+              <p class="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-6">Institutions &amp; grands comptes</p>
+              <div class="mb-6 pb-6 border-b border-white/10">
+                <span class="font-serif text-3xl text-foreground">Sur devis</span>
+              </div>
+              <ul class="space-y-3 text-sm text-muted-foreground mb-8 flex-1">
+                <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0 mt-0.5"></i>SLA, intégrations SI et API dédiées</li>
+                <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0 mt-0.5"></i>Flux de données personnalisés</li>
+                <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-primary shrink-0 mt-0.5"></i>Chargé de compte dédié</li>
+              </ul>
+              <a href="{% url 'website:contact' %}" class="group flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white/5 border border-white/10 hover:border-accent/35 hover:bg-white/[0.07] transition-all duration-300 mt-auto font-medium text-sm">
+                <i data-lucide="mail" class="w-4 h-4 text-primary"></i>
+                <span>Nous contacter</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="comment-ca-marche" class="relative py-24 pb-0 px-6 overflow-hidden -mt-px">
+        <div class="max-w-7xl mx-auto">
+          <div class="text-center max-w-2xl mx-auto mb-16">
+            <span class="text-xs font-mono tracking-widest text-primary uppercase mb-4 block">Parcours</span>
+            <h2 class="font-serif text-4xl sm:text-5xl leading-tight mb-4">Comment <span class="italic text-accent">ça marche</span></h2>
+            <p class="text-muted-foreground text-sm leading-relaxed">De la recherche à l'exploitation : quatre étapes pour naviguer le territoire avec la même rigueur qu'un poste de contrôle.</p>
+          </div>
+          <div class="illeto-how-wrap px-0 sm:px-2">
+            <div class="illeto-how-rail" aria-hidden="true"></div>
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-12 lg:gap-8 lg:pt-4 relative z-[1]">
+              <div class="illeto-how-step last:pb-0">
+                <span class="illeto-how-icon" aria-hidden="true"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <p class="illeto-how-stepnum">01</p>
+                <h3 class="font-serif text-xl text-foreground mb-2">Rechercher</h3>
+                <p class="text-sm text-muted-foreground leading-relaxed">Saisissez un quartier, une commune ou un thème — l'interface propose des entrées alignées sur nos référentiels.</p>
+              </div>
+              <div class="illeto-how-step last:pb-0">
+                <span class="illeto-how-icon" aria-hidden="true"><i class="fa-solid fa-map"></i></span>
+                <p class="illeto-how-stepnum">02</p>
+                <h3 class="font-serif text-xl text-foreground mb-2">Visualiser</h3>
+                <p class="text-sm text-muted-foreground leading-relaxed">Ouvrez l'atlas : couches administratives, environnementales et infrastructurelles en lecture structurée.</p>
+              </div>
+              <div class="illeto-how-step last:pb-0">
+                <span class="illeto-how-icon" aria-hidden="true"><i class="fa-solid fa-chart-line"></i></span>
+                <p class="illeto-how-stepnum">03</p>
+                <h3 class="font-serif text-xl text-foreground mb-2">Analyser</h3>
+                <p class="text-sm text-muted-foreground leading-relaxed">Croisez les niveaux (département → commune → quartier) et les métadonnées pour vos dossiers ou études.</p>
+              </div>
+              <div class="illeto-how-step last:pb-0">
+                <span class="illeto-how-icon" aria-hidden="true"><i class="fa-solid fa-download"></i></span>
+                <p class="illeto-how-stepnum">04</p>
+                <h3 class="font-serif text-xl text-foreground mb-2">Exporter</h3>
+                <p class="text-sm text-muted-foreground leading-relaxed">Selon votre offre, exportez en haute résolution ou intégrez les flux dans vos outils métiers.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="trust-section relative py-24 px-6">
+        <div class="max-w-6xl mx-auto">
+          <div class="trust-logos-row flex flex-wrap justify-center items-center gap-x-12 gap-y-8 sm:gap-x-14 sm:gap-y-10 opacity-55 hover:opacity-80 transition-opacity duration-300">
+            <div class="flex items-center gap-2 text-muted-foreground"><i data-lucide="globe" class="w-5 h-5 text-primary/50 shrink-0"></i><span class="font-mono text-sm">IGN Bénin</span></div>
+            <div class="flex items-center gap-2 text-muted-foreground"><i data-lucide="globe" class="w-5 h-5 text-primary/50 shrink-0"></i><span class="font-mono text-sm">INSAE</span></div>
+            <div class="flex items-center gap-2 text-muted-foreground"><i data-lucide="globe" class="w-5 h-5 text-primary/50 shrink-0"></i><span class="font-mono text-sm">Ministère du Cadre de Vie</span></div>
+            <div class="flex items-center gap-2 text-muted-foreground"><i data-lucide="globe" class="w-5 h-5 text-primary/50 shrink-0"></i><span class="font-mono text-sm">GIZ</span></div>
+            <div class="flex items-center gap-2 text-muted-foreground"><i data-lucide="globe" class="w-5 h-5 text-primary/50 shrink-0"></i><span class="font-mono text-sm">AFD</span></div>
+          </div>
+        </div>
+      </section>
+    </main>
+{% endblock %}

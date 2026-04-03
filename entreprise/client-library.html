@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ma Cartothèque - Illeto</title>
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <link rel="stylesheet" href="assets/css/illeto-dashboard-client.css" />
+  <script type="module" src="assets/js/main.js"></script>
+</head>
+
+<body>
+  <div id="overlay" class="overlay"></div>
+
+  <!-- TOPBAR -->
+  <nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3">
+    <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-primary btn-icon btn-sm" type="button" aria-label="Menu">
+      <i class="ti ti-layout-sidebar-left-expand"></i>
+    </button>
+    <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2" type="button" aria-label="Menu mobile">
+      <i class="ti ti-layout-sidebar-left-expand"></i>
+    </button>
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <span class="illeto-pill">Client</span>
+      <a class="btn btn-light btn-icon btn-sm rounded-circle" href="client-home.html" aria-label="Retour accueil">
+        <i class="ti ti-arrow-back-up"></i>
+      </a>
+    </div>
+  </nav>
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="sidebar">
+    <div class="logo-area">
+      <a href="client-home.html" class="d-inline-flex align-items-center">
+        <img src="../assets/images/logo.png" alt="Illeto" width="70" style="filter: brightness(0) invert(1);zoom: 2;" />
+      </a>
+    </div>
+
+    <ul class="nav flex-column">
+      <li><a class="nav-link" href="client-home.html"><i class="ti ti-home"></i><span class="nav-text">Accueil</span></a></li>
+      <li><a class="nav-link active" href="client-library.html"><i class="ti ti-box-seam"></i><span class="nav-text">Cartothèque</span></a></li>
+      <li><a class="nav-link" href="client-store.html"><i class="ti ti-shopping-cart"></i><span class="nav-text">Boutique</span></a></li>
+      <li><a class="nav-link" href="client-billing.html"><i class="ti ti-receipt"></i><span class="nav-text">Facturation</span></a></li>
+      <li><a class="nav-link" href="client-settings.html"><i class="ti ti-settings"></i><span class="nav-text">Paramètres</span></a></li>
+      <li class="px-4 pt-4 pb-2"><small class="nav-text">Compte</small></li>
+      <li><a class="nav-link" href="../connexion.html"><i class="ti ti-logout"></i><span class="nav-text">Connexion</span></a></li>
+    </ul>
+
+    <div class="illeto-userbox" aria-label="Compte">
+      <div class="illeto-userbox__name">Jean Dupont</div>
+      <div class="illeto-userbox__plan">Plan: Étudiant</div>
+      <div class="mt-2" style="font-size: 12px;">
+        <a href="client-settings.html" class="text-decoration-none" style="color: rgba(45,212,191,0.95); font-weight: 800;">Gérer</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main id="content" class="content py-10">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="d-flex justify-content-between align-items-center mb-4 gap-3 flex-wrap">
+            <div>
+              <h1 class="fs-3 mb-1" style="font-weight: 950;">Ma Cartothèque</h1>
+              <p class="mb-0 illeto-muted">Vos couches et quartiers débloqués. Téléchargez à nouveau en 1 clic.</p>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-outline-secondary" type="button" onclick="window.location='client-store.html'">
+                <i class="ti ti-shopping-bag me-2"></i> Acheter
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Library list -->
+      <div class="row g-3">
+        <div class="col-12 col-lg-4">
+          <div class="card illeto-card h-100">
+            <div class="card-body p-4">
+              <div class="d-flex justify-content-between align-items-start gap-3">
+                <div>
+                  <div class="illeto-muted small" style="font-weight: 900; letter-spacing: 0.01em;">Borgou • Parakou</div>
+                  <div style="font-weight: 1000; font-size: 1.15rem; margin-top: 4px;">Plan cadastral de Parakou</div>
+                  <div class="small illeto-muted mt-2">Disponible en GeoJSON, PDF, PNG</div>
+                </div>
+                <div class="dropdown">
+                  <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Télécharger à nouveau
+                  </button>
+                  <div class="dropdown-menu dropdown-menu-end" style="min-width: 260px;">
+                    <a class="dropdown-item" href="#" data-il-download="geojson" data-il-download-label="Plan cadastral de Parakou">
+                      GeoJSON
+                    </a>
+                    <a class="dropdown-item" href="#" data-il-download="pdf" data-il-download-label="Plan cadastral de Parakou">
+                      PDF
+                    </a>
+                    <a class="dropdown-item" href="#" data-il-download="png" data-il-download-label="Plan cadastral de Parakou">
+                      PNG
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-3 d-flex gap-2 flex-wrap">
+                <span class="illeto-pill">Débloqué</span>
+                <span class="illeto-pill" style="background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.10); color: rgba(255,255,255,0.86);">
+                  Achat: 18/03
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+          <div class="card illeto-card h-100">
+            <div class="card-body p-4">
+              <div class="d-flex justify-content-between align-items-start gap-3">
+                <div>
+                  <div class="illeto-muted small" style="font-weight: 900; letter-spacing: 0.01em;">Littoral • Cotonou</div>
+                  <div style="font-weight: 1000; font-size: 1.15rem; margin-top: 4px;">Réseau SBEE Littoral</div>
+                  <div class="small illeto-muted mt-2">Disponible en GeoJSON, PDF, PNG</div>
+                </div>
+                <div class="dropdown">
+                  <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Télécharger à nouveau
+                  </button>
+                  <div class="dropdown-menu dropdown-menu-end" style="min-width: 260px;">
+                    <a class="dropdown-item" href="#" data-il-download="geojson" data-il-download-label="Réseau SBEE Littoral">
+                      GeoJSON
+                    </a>
+                    <a class="dropdown-item" href="#" data-il-download="pdf" data-il-download-label="Réseau SBEE Littoral">
+                      PDF
+                    </a>
+                    <a class="dropdown-item" href="#" data-il-download="png" data-il-download-label="Réseau SBEE Littoral">
+                      PNG
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-3 d-flex gap-2 flex-wrap">
+                <span class="illeto-pill">Débloqué</span>
+                <span class="illeto-pill" style="background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.10); color: rgba(255,255,255,0.86);">
+                  Achat: 26/02
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+          <div class="card illeto-card h-100">
+            <div class="card-body p-4">
+              <div class="d-flex justify-content-between align-items-start gap-3">
+                <div>
+                  <div class="illeto-muted small" style="font-weight: 900; letter-spacing: 0.01em;">Atlantique • Ouidah</div>
+                  <div style="font-weight: 1000; font-size: 1.15rem; margin-top: 4px;">Réseau routier Atlantique</div>
+                  <div class="small illeto-muted mt-2">Disponible en GeoJSON, PDF, PNG</div>
+                </div>
+                <div class="dropdown">
+                  <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Télécharger à nouveau
+                  </button>
+                  <div class="dropdown-menu dropdown-menu-end" style="min-width: 260px;">
+                    <a class="dropdown-item" href="#" data-il-download="geojson" data-il-download-label="Réseau routier Atlantique">
+                      GeoJSON
+                    </a>
+                    <a class="dropdown-item" href="#" data-il-download="pdf" data-il-download-label="Réseau routier Atlantique">
+                      PDF
+                    </a>
+                    <a class="dropdown-item" href="#" data-il-download="png" data-il-download-label="Réseau routier Atlantique">
+                      PNG
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-3 d-flex gap-2 flex-wrap">
+                <span class="illeto-pill">Débloqué</span>
+                <span class="illeto-pill" style="background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.10); color: rgba(255,255,255,0.86);">
+                  Achat: 09/01
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+          <div class="card illeto-card h-100">
+            <div class="card-body p-4">
+              <div class="d-flex justify-content-between align-items-start gap-3">
+                <div>
+                  <div class="illeto-muted small" style="font-weight: 900; letter-spacing: 0.01em;">Ouémé • Porto-Novo</div>
+                  <div style="font-weight: 1000; font-size: 1.15rem; margin-top: 4px;">Zones hydrologiques Ouémé</div>
+                  <div class="small illeto-muted mt-2">Disponible en GeoJSON, PDF, PNG</div>
+                </div>
+                <div class="dropdown">
+                  <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Télécharger à nouveau
+                  </button>
+                  <div class="dropdown-menu dropdown-menu-end" style="min-width: 260px;">
+                    <a class="dropdown-item" href="#" data-il-download="geojson" data-il-download-label="Zones hydrologiques Ouémé">
+                      GeoJSON
+                    </a>
+                    <a class="dropdown-item" href="#" data-il-download="pdf" data-il-download-label="Zones hydrologiques Ouémé">
+                      PDF
+                    </a>
+                    <a class="dropdown-item" href="#" data-il-download="png" data-il-download-label="Zones hydrologiques Ouémé">
+                      PNG
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-3 d-flex gap-2 flex-wrap">
+                <span class="illeto-pill">Débloqué</span>
+                <span class="illeto-pill" style="background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.10); color: rgba(255,255,255,0.86);">
+                  Achat: 21/12
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="card illeto-card">
+            <div class="card-body p-4">
+              <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                <div>
+                  <div style="font-weight: 1000; font-size: 1.1rem;">Toujours utile</div>
+                  <div class="illeto-muted small" style="margin-top: 4px;">Vos téléchargements sont réutilisables pour vos rapports, analyses et présentations.</div>
+                </div>
+                <a class="btn btn-primary illeto-big-cta" style="max-width: 320px;" href="client-store.html">
+                  <i class="ti ti-plus me-2"></i>Ajouter de nouvelles données
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="assets/js/illeto-dashboard-client.js" defer></script>
+</body>
+
+</html>
+
