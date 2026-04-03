@@ -1,6 +1,10 @@
+
+
+<img width="405" height="406" alt="favicon" src="https://github.com/user-attachments/assets/13a6536a-ae95-49a8-8a11-052ea972de8c" />
+
 # IlèTô - Plateforme d'Intelligence Territoriale du Bénin
 
-IlèTô ("Ma Terre" en langue locale) est un Système d'Information Géographique (SIG) de nouvelle génération dédié à la visualisation, l'analyse et la gestion des données administratives, hydrologiques et socio-économiques du Bénin.
+IlèTô  est un Système d'Information Géographique (SIG) de nouvelle génération dédié à la visualisation, l'analyse et la gestion des données administratives, hydrologiques et socio-économiques du Bénin.
 
 ## 🚀 Fonctionnalités Clés
 
@@ -60,7 +64,7 @@ python manage.py geo_import_hdx_boundaries --path data/ben_admin2.geojson --leve
 
 Chaque action d'importation est tracée dans le modèle `ImportLog`. Vous pouvez consulter l'état de santé des données et les journaux d'erreurs via le tableau de bord de maintenance :
 
-👉 [http://127.0.0.1:8000/admin/geo-maintenance/](http://127.0.0.1:8000/admin/geo-maintenance/)
+👉 [/admin/geo-maintenance/](http://127.0.0.1:8000/admin/geo-maintenance/)
 
 ## 🎨 Guide de Style (UI/UX)
 
