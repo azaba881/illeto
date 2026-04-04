@@ -658,13 +658,20 @@
     var idStr = id != null && id !== "" ? String(id) : "";
 
     if (type === "departement") {
-      applyDepartmentSelection(idStr, data.name || "");
+      var dLabel =
+        (data.shapeName && String(data.shapeName).trim()) ||
+        (data.name && String(data.name).trim()) ||
+        "";
+      applyDepartmentSelection(idStr, dLabel);
       return;
     }
 
     if (type === "commune") {
       atlasState.communeId = idStr || null;
-      atlasState.communeName = (data.name && String(data.name).trim()) || "";
+      atlasState.communeName =
+        (data.shapeName && String(data.shapeName).trim()) ||
+        (data.name && String(data.name).trim()) ||
+        "";
       atlasState.neighborhood = null;
       atlasState.neighborhoodName = "";
       atlasState.neighborhoodKind = null;
@@ -719,7 +726,10 @@
     if (type === "quartier" || type === "zone") {
       var kind = data.kind || (type === "zone" ? "zone" : "quartier");
       atlasState.neighborhood = idStr || null;
-      atlasState.neighborhoodName = (data.name && String(data.name).trim()) || "";
+      atlasState.neighborhoodName =
+        (data.shapeName && String(data.shapeName).trim()) ||
+        (data.name && String(data.name).trim()) ||
+        "";
       atlasState.neighborhoodKind = kind;
       var qCont2 = qs('[data-cascade="quartier"]');
       var qBtn2 = qCont2 ? qs("[data-cascade-btn]", qCont2) : null;

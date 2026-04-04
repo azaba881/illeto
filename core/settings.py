@@ -34,6 +34,19 @@ ILLETO_GEO_INCLUDE_PLACEHOLDER_COMMUNES = env.bool(
 # Atlas : surcouches Mapbox (trafic, fonds raster Mapbox). Laisser vide = replis OSM/Carto.
 ILLETO_MAPBOX_ACCESS_TOKEN = env("ILLETO_MAPBOX_ACCESS_TOKEN", default="")
 
+# Imports géographiques (chemins relatifs au BASE_DIR ; laisser vide = pas de défaut)
+ILLETO_HDX_ADM1_PATH = env("ILLETO_HDX_ADM1_PATH", default="")
+ILLETO_HDX_ADM2_PATH = env("ILLETO_HDX_ADM2_PATH", default="")
+ILLETO_HDX_ADM3_PATH = env("ILLETO_HDX_ADM3_PATH", default="")
+ILLETO_OVERPASS_API_URL = env(
+    "ILLETO_OVERPASS_API_URL",
+    default="https://overpass-api.de/api/interpreter",
+)
+ILLETO_OSM_DISTRICTS_PATH = env("ILLETO_OSM_DISTRICTS_PATH", default="")
+ILLETO_POI_GEOJSON_PATH = env("ILLETO_POI_GEOJSON_PATH", default="")
+ILLETO_HYDRO_GEOJSON_PATH = env("ILLETO_HYDRO_GEOJSON_PATH", default="")
+ILLETO_VECTOR_IMPORT_DEFAULT_PATH = env("ILLETO_VECTOR_IMPORT_DEFAULT_PATH", default="")
+
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",

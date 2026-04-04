@@ -89,7 +89,11 @@ def departement_geojson(request):
             {
                 "type": "Feature",
                 "id": d.pk,
-                "properties": {"name": d.name},
+                "properties": {
+                    "name": d.name,
+                    "shapeName": d.name,
+                    "code_officiel": d.code_officiel or "",
+                },
                 "geometry": geom,
             }
         )
@@ -144,7 +148,11 @@ def communes_geojson(request):
             {
                 "type": "Feature",
                 "id": c.pk,
-                "properties": {"name": c.name},
+                "properties": {
+                    "name": c.name,
+                    "shapeName": c.name,
+                    "code_officiel": c.code_officiel or "",
+                },
                 "geometry": geom,
             }
         )
@@ -184,9 +192,11 @@ def zones_geojson_by_commune(request):
                 "id": z.pk,
                 "properties": {
                     "name": z.name,
+                    "shapeName": z.name,
                     "kind": "zone",
                     "admin_level": 8,
                     "type_zone": z.type_zone or "",
+                    "osm_id": z.osm_id or "",
                 },
                 "geometry": geom,
             }
@@ -200,8 +210,10 @@ def zones_geojson_by_commune(request):
                 "id": q.pk,
                 "properties": {
                     "name": q.name,
+                    "shapeName": q.name,
                     "kind": "quartier",
                     "admin_level": 10,
+                    "osm_id": q.osm_id or "",
                 },
                 "geometry": geom,
             }

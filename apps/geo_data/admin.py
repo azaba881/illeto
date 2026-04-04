@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
+from django.urls import path
 
+from .admin_import import import_geo_view
 from .models import Commune, Departement, HydroZone, ImportLog, PointInteret, Zone
 
 User = get_user_model()
@@ -8,6 +10,18 @@ User = get_user_model()
 
 @admin.register(ImportLog)
 class ImportLogAdmin(admin.ModelAdmin):
+    change_list_template = "admin/geo_data/importlog/change_list.html"
+
+    def get_urls(self):
+        info = self.opts.app_label, self.opts.model_name
+        return [
+            path(
+                "import-geo/",
+                self.admin_site.admin_view(import_geo_view),
+                name="%s_%s_import_geo" % info,
+            ),
+        ] + super().get_urls()
+
     list_display = ("created_at", "command_name", "file_name", "success_count", "admin_user")
     list_filter = ("command_name",)
     search_fields = ("file_name", "error_log")
