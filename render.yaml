@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: illeto-atlas
+    env: docker
+    plan: free
+    region: frankfurt
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: illeto-db
+          property: connectionString
+      - key: ILLETO_PLAYWRIGHT_EXPORT_ENABLED
+        value: "True"
+      - key: ILLETO_EXPORT_MAX_CONCURRENT
+        value: "1"
+      - key: DEBUG
+        value: "False"
+
+databases:
+  - name: illeto-db
+    databaseName: illeto_db
+    user: root
+    plan: free
+    # On ajoute l'extension PostGIS automatiquement
+    ipAllowList: []

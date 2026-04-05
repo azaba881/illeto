@@ -5,6 +5,7 @@ Environment-driven configuration with django-environ, PostGIS, and GeoDjango.
 """
 
 import os
+import dj_database_url
 from pathlib import Path
 
 import environ
@@ -142,13 +143,50 @@ WSGI_APPLICATION = "core.wsgi.application"
 # https://docs.djangoproject.com/en/stable/ref/contrib/gis/tutorial/#setting-up
 # DATABASE_URL examples: postgis://user:pass@host:5432/dbname
 # Engine is forced to PostGIS regardless of URL scheme (postgresql/postgis).
+# Vérifie si on est sur Render ou en local
 
-DATABASES = {
-    "default": env.db_url(
-        "DATABASE_URL",
-        default="postgis://postgres:postgres@127.0.0.1:5432/ileto_db",
-    )
+IS_HEROKU_OR_RENDER = "DATABASE_URL" in os.environ
+
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         # Utilise l'URL de Render si elle existe, sinon ton PostGIS local
+#         default=os.environ.get('DATABASE_URL', 'postgis://postgres:postgres@127.0.0.1:5432/ileto_db'),
+#         conn_max_age=600,
+#         # N'exige le SSL QUE sur le cloud (Render/Heroku/etc.)
+#         ssl_require=IS_HEROKU_OR_RENDER
+#     )
+# }
+
+# 1. On définit la config locale (celle qui marche sur ton PC)
+DATABASE_LOCAL = {
+    'ENGINE': 'django.contrib.gis.db.backends.postgis',
+    'NAME': 'illeto_db',
+    'USER': 'root',
+    'PASSWORD': 'motdepasse',
+    'HOST': '127.0.0.1',
+    'PORT': '5432',
 }
+
+# 2. On regarde si Render nous donne une URL de base de données
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
+    # SI OUI : On est sur Render, on utilise sa config avec SSL
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True
+        )
+    }
+    DATABASES["default"]["ENGINE"] = "django.contrib.gis.db.backends.postgis"
+else:
+    # SI NON : On est sur ton PC, on utilise la config locale
+    DATABASES = {
+        'default': DATABASE_LOCAL
+    }
+
+# Garde bien cette ligne pour le moteur GIS
 DATABASES["default"]["ENGINE"] = "django.contrib.gis.db.backends.postgis"
 
 
