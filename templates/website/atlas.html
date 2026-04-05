@@ -56,6 +56,11 @@
   .atlas-map-wrap.atlas-vue-3d-active #map .leaflet-container {
     pointer-events: none !important;
   }
+  .atlas-flyout-panel button.active-basemap {
+    border-color: rgba(166, 124, 82, 0.88) !important;
+    box-shadow: 0 0 0 1px rgba(166, 124, 82, 0.45);
+    background: rgba(59, 130, 246, 0.14) !important;
+  }
   #map .leaflet-container {
     font-family: inherit;
     background: #03050c;
@@ -589,9 +594,9 @@
 
     <div id="perspective-switcher" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-2">
       <div id="atlas-basemap-flyout" class="atlas-flyout-panel hidden rounded-xl py-2 px-2 min-w-[11.5rem] flex flex-col gap-0.5" role="menu" aria-label="Fonds de carte">
-        <button type="button" data-basemap="dark" class="w-full text-left text-xs font-medium px-3 py-2 rounded-lg text-foreground/90 hover:text-primary transition-colors" title="Fond sombre (Mapbox ou Carto)">Sombre (Carto Dark)</button>
-        <button type="button" data-basemap="satellite" class="w-full text-left text-xs font-medium px-3 py-2 rounded-lg text-foreground/90 hover:text-primary transition-colors" title="Imagerie satellite (Esri)">Satellite</button>
-        <button type="button" data-basemap="administrative" class="w-full text-left text-xs font-medium px-3 py-2 rounded-lg text-foreground/90 hover:text-primary transition-colors" title="Fond clair type administratif (Mapbox light)">Administratif</button>
+        <button type="button" data-basemap="dark" class="w-full text-left text-xs font-medium px-3 py-2 rounded-lg text-foreground/90 hover:text-primary transition-colors border border-transparent" title="Fond sombre (Mapbox ou Carto)">Sombre (Carto Dark)</button>
+        <button type="button" data-basemap="satellite" class="w-full text-left text-xs font-medium px-3 py-2 rounded-lg text-foreground/90 hover:text-primary transition-colors border border-transparent" title="Imagerie satellite (Esri World Imagery) — vue photo aérienne réelle">Satellite (Esri)</button>
+        <button type="button" data-basemap="administrative" class="w-full text-left text-xs font-medium px-3 py-2 rounded-lg text-foreground/90 hover:text-primary transition-colors border border-transparent" title="Fond clair type administratif (Mapbox light)">Administratif</button>
       </div>
       <div id="atlas-perspective-extras-flyout" class="atlas-flyout-panel hidden rounded-xl py-2 px-2 min-w-[11.5rem] flex flex-col gap-1" role="menu" aria-label="Calques thématiques">
         <p class="text-[9px] uppercase tracking-wider text-muted-foreground px-2 pb-1">Surcouches</p>
@@ -600,7 +605,7 @@
         <button type="button" data-extra-layer="transport" class="w-full text-left text-xs font-medium px-3 py-2 rounded-lg text-foreground/80 border border-transparent hover:border-slate-600/50 transition-colors" title="Réseau ferroviaire (OpenRailwayMap)">Transports (rails)</button>
         {% if mapbox_access_token %}
         <button type="button" data-extra-layer="terrain3d" class="w-full text-left text-xs font-medium px-3 py-2 rounded-lg text-foreground/80 border border-transparent hover:border-slate-600/50 transition-colors" title="Terrain Mapbox 3D (DEM), bâtiments au zoom 15+, inclinaison automatique">Relief 3D live</button>
-        <button type="button" data-extra-layer="vue3d" class="w-full text-left text-xs font-medium px-3 py-2 rounded-lg text-foreground/80 border border-transparent hover:border-slate-600/50 transition-colors" title="Vue 3D : inclinaison 45°, rotation (Ctrl+glisser ou pavé tactile), terrain + bâtiments — désactivez pour cliquer les territoires">Vue 3D</button>
+        <button type="button" data-extra-layer="vue3d" class="w-full text-left text-xs font-medium px-3 py-2 rounded-lg text-foreground/80 border border-transparent hover:border-slate-600/50 transition-colors" title="Vue 3D satellite : fond photo aérienne (Esri) + bâtiments extrudés Mapbox. Ctrl+glisser pour pivoter. Zoom min. 15. Désactivez pour cliquer les territoires.">Vue 3D (satellite + bâtiments)</button>
         {% endif %}
       </div>
       <div class="atlas-glass-panel rounded-xl p-1.5 flex items-center gap-1 relative">
@@ -1025,6 +1030,38 @@
     }
   }
 
+  /**
+   * Vue 3D + satellite Esri : masque les calques Mapbox sauf fill-extrusion (bâtiments)
+   * pour laisser voir l’imagerie Esri sous les extrusions.
+   */
+  function applyMbMinimalBasemapForVue3dOverSatellite() {
+    if (!mbBaseMap || !atlasVue3dActive || !basemapIsSatellite) return;
+    try {
+      if (
+        typeof mbBaseMap.isStyleLoaded === "function" &&
+        !mbBaseMap.isStyleLoaded()
+      ) {
+        return;
+      }
+      var st = mbBaseMap.getStyle();
+      if (!st || !st.layers) return;
+      for (var i = 0; i < st.layers.length; i++) {
+        var ly = st.layers[i];
+        var id = ly && ly.id;
+        if (!id || typeof id !== "string") continue;
+        if (id === "atlas-3d-buildings") continue;
+        if (ly.type === "fill-extrusion") continue;
+        try {
+          mbBaseMap.setLayoutProperty(id, "visibility", "none");
+        } catch (eH) {
+          /* */
+        }
+      }
+    } catch (eAll) {
+      /* */
+    }
+  }
+
   function ensureAtlasBuildingExtrusionLayer() {
     if (!mbBaseMap || !atlasMbTerrainOrBuildingsWanted()) return;
     try {
@@ -1121,14 +1158,36 @@
     syncMbBaseFromLeaflet();
   }
 
+  /* Sauvegarde du basemap avant l'entrée en Vue 3D, pour restaurer à la sortie. */
+  var __vue3dSavedBasemapIsSatellite = false;
+  var __vue3dSavedMapThemeIsLight = false;
+
   function setAtlasVue3dMode(on) {
     atlasVue3dActive = !!on;
     var wrap = document.getElementById("atlas-map-wrap-root");
     if (wrap) wrap.classList.toggle("atlas-vue-3d-active", atlasVue3dActive);
     if (!mbBaseMap) return;
     if (atlasVue3dActive) {
+      __vue3dSavedBasemapIsSatellite = basemapIsSatellite;
+      __vue3dSavedMapThemeIsLight = mapThemeIsLight;
+
+      /* Satellite + même flux que le flyout (état & UI cohérents). */
+      switchBasemap("satellite");
+
       applyMbTerrainSourceAnd3d();
       ensureAtlasBuildingExtrusionLayer();
+      try {
+        if (typeof mbBaseMap.once === "function") {
+          mbBaseMap.once("idle", function () {
+            applyMbMinimalBasemapForVue3dOverSatellite();
+          });
+        } else {
+          setTimeout(applyMbMinimalBasemapForVue3dOverSatellite, 500);
+        }
+      } catch (eIdl) {
+        /* */
+      }
+
       try {
         mbBaseMap.dragRotate.enable();
         if (mbBaseMap.touchZoomRotate && mbBaseMap.touchZoomRotate.enable) {
@@ -1137,33 +1196,74 @@
         if (mbBaseMap.keyboard && mbBaseMap.keyboard.enable) {
           mbBaseMap.keyboard.enable();
         }
-      } catch (eEn) {
-        /* */
+      } catch (eEn) { /* */ }
+
+      if (map && map.getZoom() < 15) {
+        map.setZoom(15, { animate: true });
       }
-      showAtlasToast(
-        "Vue 3D : Ctrl + glisser (souris) pour tourner — désactivez pour cliquer les territoires."
-      );
+
+      try {
+        mbBaseMap.easeTo({ pitch: 55, bearing: -17, duration: 900 });
+      } catch (ePitch) { /* */ }
+
+      showAtlasToast("Vue 3D satellite : Ctrl+glisser pour tourner — désactivez pour cliquer les territoires.");
     } else {
       try {
         mbBaseMap.dragRotate.disable();
-      } catch (eDis) {
-        /* */
-      }
+      } catch (eDis) { /* */ }
       try {
-        if (typeof mbBaseMap.resetNorth === "function") {
-          mbBaseMap.resetNorth({ animate: false });
-        } else {
-          mbBaseMap.setBearing(0);
-        }
+        mbBaseMap.easeTo({ pitch: 0, bearing: 0, duration: 600 });
       } catch (eNorth) {
+        try { mbBaseMap.setBearing(0); } catch (eB0) { /* */ }
+      }
+      clearMbTerrainIfDisabled();
+
+      basemapIsSatellite = __vue3dSavedBasemapIsSatellite;
+      mapThemeIsLight = __vue3dSavedMapThemeIsLight;
+      if (useMbGlBase && mbBaseMap) {
+        function finishVue3dExitUi() {
+          applyMbPostStyleMaintenance();
+          applyRasterBasemap();
+          syncMbBaseFromLeaflet();
+          updateMapThemeToggleUI();
+          try {
+            if (typeof window.__atlasRefreshBasemapFlyout === "function") {
+              window.__atlasRefreshBasemapFlyout(atlasBasemapFlyoutKey());
+            }
+          } catch (eUi) {
+            /* */
+          }
+        }
         try {
-          mbBaseMap.setBearing(0);
-        } catch (eB0) {
+          mbBaseMap.setStyle(mapboxBasemapStyleUrl(mapThemeIsLight));
+          if (typeof mbBaseMap.once === "function") {
+            mbBaseMap.once("idle", finishVue3dExitUi);
+          } else {
+            setTimeout(finishVue3dExitUi, 800);
+          }
+        } catch (eSt) {
+          applyRasterBasemap();
+          applyMbPostStyleMaintenance();
+          updateMapThemeToggleUI();
+          try {
+            if (typeof window.__atlasRefreshBasemapFlyout === "function") {
+              window.__atlasRefreshBasemapFlyout(atlasBasemapFlyoutKey());
+            }
+          } catch (eUi2) {
+            /* */
+          }
+        }
+      } else {
+        applyRasterBasemap();
+        updateMapThemeToggleUI();
+        try {
+          if (typeof window.__atlasRefreshBasemapFlyout === "function") {
+            window.__atlasRefreshBasemapFlyout(atlasBasemapFlyoutKey());
+          }
+        } catch (eUi3) {
           /* */
         }
       }
-      clearMbTerrainIfDisabled();
-      applyMbPostStyleMaintenance();
     }
     syncMbBaseFromLeaflet();
   }
@@ -1210,12 +1310,22 @@
     var pitch = 0;
     var bearing = 0;
     if (atlasVue3dActive) {
-      pitch = 45;
+      pitch = 55;
       try {
         bearing = mbBaseMap.getBearing();
       } catch (eBr) {
-        bearing = 0;
+        bearing = -15;
       }
+      /* En mode 3D, synchroniser seulement centre+zoom, pas le pitch (géré par easeTo) */
+      try {
+        mbBaseMap.jumpTo({
+          center: [c.lng, c.lat],
+          zoom: z,
+          bearing: bearing,
+          pitch: pitch,
+        });
+      } catch (eJ) { /* */ }
+      return;
     } else if (atlasTerrain3dLive && z > 15) {
       pitch = 45;
     }
@@ -1236,7 +1346,10 @@
       zoom: 7,
       interactive: true,
       attributionControl: true,
+      /* Export PNG/PDF : buffer WebGL conservé pour toDataURL / capture sync. */
       preserveDrawingBuffer: true,
+      failIfMajorPerformanceCaveat: false,
+      antialias: true,
     });
     window.__atlasMbglMap = mbBaseMap;
     mbBaseMap.on("load", function () {
@@ -1315,7 +1428,11 @@
       if (useMbGlBase && mbBaseMap) {
         var mbEl = document.getElementById("atlas-mb-base");
         if (basemapIsSatellite) {
-          if (mbEl) mbEl.style.visibility = "hidden";
+          if (mbEl) {
+            /* Vue 3D : Mapbox reste visible (bâtiments) au-dessus des tuiles Esri (z-index CSS). */
+            mbEl.style.visibility =
+              atlasVue3dActive && useMbGlBase ? "visible" : "hidden";
+          }
           var nextSat = layerSat;
           if (activeBasemapLayer !== nextSat) {
             if (activeBasemapLayer && map.hasLayer(activeBasemapLayer)) {
@@ -1366,11 +1483,30 @@
       }
     }
     applyRasterBasemap();
+    try {
+      if (typeof window.__atlasRefreshBasemapFlyout === "function") {
+        window.__atlasRefreshBasemapFlyout(key);
+      }
+    } catch (eRf) {
+      /* */
+    }
+  }
+
+  function atlasBasemapFlyoutKey() {
+    if (basemapIsSatellite) return "satellite";
+    return mapThemeIsLight ? "administrative" : "dark";
   }
 
   function setMapThemeLight(isLight) {
     mapThemeIsLight = !!isLight;
     if (!basemapIsSatellite) applyRasterBasemap();
+    try {
+      if (typeof window.__atlasRefreshBasemapFlyout === "function") {
+        window.__atlasRefreshBasemapFlyout(atlasBasemapFlyoutKey());
+      }
+    } catch (eTh) {
+      /* */
+    }
   }
 
   function updateMapThemeToggleUI() {
@@ -1841,7 +1977,157 @@
     };
   }
 
-  /** html2canvas ne parse pas oklch / color-mix : remplace jusqu’à stabilité. */
+  /**
+   * html2canvas clone sans nos feuilles CSS : le flex (#map flex:1 min-height:0) donne hauteur 0.
+   * On mesure le vrai viewport carte et on réinjecte des px explicites dans le clone.
+   */
+  function atlasExportResolveCaptureSize(el) {
+    var fw = 1200;
+    var fh = 720;
+    if (!el || typeof el.getBoundingClientRect !== "function") {
+      return { w: fw, h: fh };
+    }
+    var r = el.getBoundingClientRect();
+    var w = Math.round(r.width || el.clientWidth || el.offsetWidth || 0);
+    var h = Math.round(r.height || el.clientHeight || el.offsetHeight || 0);
+    if (h < 4) {
+      try {
+        var lc = el.querySelector && el.querySelector(".leaflet-container");
+        if (lc) {
+          var lr = lc.getBoundingClientRect();
+          h = Math.round(lr.height || lc.clientHeight || lc.offsetHeight || 0);
+          if (w < 4) {
+            w = Math.round(lr.width || lc.clientWidth || lc.offsetWidth || 0);
+          }
+        }
+      } catch (e1) {
+        /* */
+      }
+    }
+    if (h < 4 || w < 4) {
+      try {
+        var wrap = document.getElementById("atlas-map-wrap-root");
+        if (wrap) {
+          var wr = wrap.getBoundingClientRect();
+          if (h < 4) {
+            h = Math.round(wr.height || wrap.clientHeight || 0);
+          }
+          if (w < 4) {
+            w = Math.round(wr.width || wrap.clientWidth || 0);
+          }
+        }
+      } catch (e2) {
+        /* */
+      }
+    }
+    if (w < 4) w = fw;
+    if (h < 4) h = fh;
+    return { w: w, h: h };
+  }
+
+  function atlasExportApplyCloneMapDimensions(doc, dims) {
+    if (!doc || !dims || dims.w < 2 || dims.h < 2) return;
+    try {
+      var wrap = doc.getElementById("atlas-map-wrap-root");
+      if (wrap) {
+        wrap.style.display = "flex";
+        wrap.style.flexDirection = "column";
+        wrap.style.height = dims.h + "px";
+        wrap.style.minHeight = dims.h + "px";
+        wrap.style.width = dims.w + "px";
+        wrap.style.minWidth = dims.w + "px";
+        wrap.style.maxHeight = dims.h + "px";
+        wrap.style.overflow = "hidden";
+      }
+      var cm = doc.getElementById("map");
+      if (cm) {
+        cm.style.flex = "none";
+        cm.style.flexGrow = "0";
+        cm.style.flexShrink = "0";
+        cm.style.height = dims.h + "px";
+        cm.style.minHeight = dims.h + "px";
+        cm.style.width = "100%";
+        cm.style.maxHeight = dims.h + "px";
+        cm.style.boxSizing = "border-box";
+        var leaflet = cm.querySelector(".leaflet-container");
+        if (leaflet) {
+          leaflet.style.height = dims.h + "px";
+          leaflet.style.minHeight = dims.h + "px";
+          leaflet.style.width = "100%";
+        }
+        var mbBase = doc.getElementById("atlas-mb-base");
+        if (mbBase) {
+          mbBase.style.height = dims.h + "px";
+          mbBase.style.minHeight = dims.h + "px";
+        }
+      }
+    } catch (eA) {
+      /* */
+    }
+  }
+
+  /** Attend que Mapbox ait fini de peindre (#map contient Leaflet + canvas Mapbox sous-jacent). */
+  function atlasExportWhenMapboxReady(done) {
+    if (typeof done !== "function") return;
+    if (!useMbGlBase || !mbBaseMap || basemapIsSatellite) {
+      setTimeout(done, 0);
+      return;
+    }
+    try {
+      if (typeof mbBaseMap.triggerRepaint === "function") {
+        mbBaseMap.triggerRepaint();
+      }
+    } catch (eRp) {
+      /* */
+    }
+    var ran = false;
+    function finish() {
+      if (ran) return;
+      ran = true;
+      try {
+        done();
+      } catch (eD) {
+        /* */
+      }
+    }
+    try {
+      var notReady =
+        (typeof mbBaseMap.loaded === "function" && !mbBaseMap.loaded()) ||
+        (typeof mbBaseMap.isStyleLoaded === "function" &&
+          !mbBaseMap.isStyleLoaded());
+      if (notReady) {
+        mbBaseMap.once("load", function () {
+          try {
+            mbBaseMap.once("idle", finish);
+          } catch (eI) {
+            finish();
+          }
+        });
+        setTimeout(finish, 2000);
+        return;
+      }
+    } catch (eL) {
+      /* */
+    }
+    try {
+      if (typeof mbBaseMap.once === "function") {
+        mbBaseMap.once("idle", finish);
+        setTimeout(finish, 2000);
+        return;
+      }
+    } catch (eO) {
+      /* */
+    }
+    setTimeout(finish, 350);
+  }
+
+  /** PNG data URL trop court = capture vide ou quasi vide (seuil bas pour PNG compressés légers). */
+  function atlasExportDataUrlLooksEmpty(dataUrl) {
+    if (!dataUrl || typeof dataUrl !== "string") return true;
+    if (dataUrl.indexOf("data:image/png") !== 0) return true;
+    return dataUrl.length < 2000;
+  }
+
   function atlasExportSanitizeCssTextFragment(text) {
     if (!text || typeof text !== "string") return text;
     var out = text;
@@ -2077,7 +2363,14 @@
    * Filigrane export : texte + coordonnées (évite CORS / échec logo image).
    * needWm : styles discrets pour comptes publics ; sinon légende légère aussi.
    */
-  function drawAtlasWatermarkLogo(canvas, needWm, centerLatLng, zoomLevel, done) {
+  function drawAtlasWatermarkLogo(
+    canvas,
+    needWm,
+    centerLatLng,
+    zoomLevel,
+    lightExportBg,
+    done
+  ) {
     if (!canvas) {
       if (typeof done === "function") done(null);
       return;
@@ -2086,10 +2379,10 @@
       canvasWidth: canvas.width,
       canvasHeight: canvas.height,
       needWm: !!needWm,
+      lightExportBg: !!lightExportBg,
     });
     try {
       var ctx = canvas.getContext("2d");
-      var margin = Math.round(Math.min(canvas.width, canvas.height) * 0.025);
       var lat =
         centerLatLng && typeof centerLatLng.lat === "number"
           ? centerLatLng.lat.toFixed(4)
@@ -2102,26 +2395,38 @@
         zoomLevel != null && !isNaN(Number(zoomLevel))
           ? Number(zoomLevel).toFixed(2)
           : "—";
-      var line1 = "IlèTô Atlas";
       var line2 = "Centre : " + lat + "°, " + lng + "° — zoom " + zm;
-      var boxH = needWm ? 52 : 44;
-      var boxW = Math.min(canvas.width - 2 * margin, 440);
+      var ax = canvas.width - 20;
+      var ay = canvas.height - 20;
+      var lineGap = 26;
       ctx.save();
-      ctx.fillStyle = needWm
-        ? "rgba(15, 23, 42, 0.78)"
-        : "rgba(15, 23, 42, 0.55)";
-      ctx.fillRect(
-        margin,
-        canvas.height - boxH - margin,
-        boxW,
-        boxH
-      );
-      ctx.fillStyle = "rgba(248, 250, 252, 0.95)";
-      ctx.font = "bold 15px system-ui, -apple-system, sans-serif";
-      ctx.fillText(line1, margin + 10, canvas.height - margin - 26);
-      ctx.font = "11px ui-monospace, monospace";
-      ctx.globalAlpha = needWm ? 0.95 : 0.85;
-      ctx.fillText(line2, margin + 10, canvas.height - margin - 8);
+      ctx.textAlign = "right";
+      ctx.textBaseline = "bottom";
+      if (lightExportBg) {
+        ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
+        ctx.shadowBlur = needWm ? 6 : 4;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 1;
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
+        ctx.fillStyle = "#0f172a";
+        ctx.font = "bold 24px Arial, sans-serif";
+        ctx.strokeText("IlèTô Atlas", ax, ay);
+        ctx.fillText("IlèTô Atlas", ax, ay);
+        ctx.font = "14px ui-monospace, monospace, Arial, sans-serif";
+        ctx.strokeText(line2, ax, ay - lineGap);
+        ctx.fillText(line2, ax, ay - lineGap);
+      } else {
+        ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
+        ctx.shadowBlur = needWm ? 8 : 6;
+        ctx.shadowOffsetX = 1;
+        ctx.shadowOffsetY = 1;
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "bold 24px Arial, sans-serif";
+        ctx.fillText("IlèTô Atlas", ax, ay);
+        ctx.font = "14px ui-monospace, monospace, Arial, sans-serif";
+        ctx.fillText(line2, ax, ay - lineGap);
+      }
       ctx.restore();
     } catch (e) {}
     if (typeof done === "function") done(canvas);
@@ -2201,6 +2506,16 @@
 
   var __atlasCaptureRestore = null;
 
+  /** Même logique que `featureDepartmentPk` (scripts.js) : id → properties.pk → properties.id. */
+  function atlasExportFeatureId(feature) {
+    if (!feature) return "";
+    if (feature.id != null && feature.id !== "") return String(feature.id);
+    var p = feature.properties || {};
+    if (p.pk != null) return String(p.pk);
+    if (p.id != null) return String(p.id);
+    return "";
+  }
+
   function endAtlasMapCapture() {
     removeAtlasExportInverseMask();
     if (!__atlasCaptureRestore) return;
@@ -2240,6 +2555,21 @@
       __atlasCaptureRestore = null;
       return false;
     }
+    /**
+     * Même territoire que la sélection carte OU que l’état Atlas (export sans clic sur polygone).
+     * Sinon sel reste faux pour tout le monde → fillOpacity 0 partout → export blanc (seuls les
+     * marqueurs HTML des labels peuvent apparaître en gris).
+     */
+    var capDeptPk =
+      selectedDeptPk ||
+      (st.departmentId != null && String(st.departmentId) !== ""
+        ? String(st.departmentId)
+        : "");
+    var capCommunePk =
+      selectedCommunePk ||
+      (st.communeId != null && String(st.communeId) !== ""
+        ? String(st.communeId)
+        : "");
     __atlasCaptureRestore = {
       skip: false,
       subZonesOn: map.hasLayer(subZonesLayerGroup),
@@ -2254,14 +2584,8 @@
     if (adminDeptLayer) {
       adminDeptLayer.eachLayer(function (lyr) {
         if (!lyr.feature) return;
-        var props = lyr.feature.properties || {};
-        var fid =
-          lyr.feature.id != null && lyr.feature.id !== ""
-            ? String(lyr.feature.id)
-            : props.pk != null
-              ? String(props.pk)
-              : "";
-        var sel = selectedDeptPk && fid === selectedDeptPk;
+        var fid = atlasExportFeatureId(lyr.feature);
+        var sel = capDeptPk && fid === capDeptPk;
         lyr.setStyle({
           color: sel ? "#007BFF" : "#00875a",
           weight: sel ? 3 : 0,
@@ -2274,14 +2598,8 @@
     if (activeCommunesLayer) {
       activeCommunesLayer.eachLayer(function (lyr) {
         if (!lyr.feature) return;
-        var props = lyr.feature.properties || {};
-        var cid =
-          lyr.feature.id != null && lyr.feature.id !== ""
-            ? String(lyr.feature.id)
-            : props.pk != null
-              ? String(props.pk)
-              : "";
-        var sel = selectedCommunePk && cid === selectedCommunePk;
+        var cid = atlasExportFeatureId(lyr.feature);
+        var sel = capCommunePk && cid === capCommunePk;
         lyr.setStyle({
           color: sel ? "#007BFF" : "#00875a",
           weight: sel ? 3 : 0,
@@ -3717,7 +4035,6 @@
             doneUnlock();
             return;
           }
-          var html2CanvasScale = 1;
 
           var subIdCap =
             st.neighborhood != null && st.neighborhood !== ""
@@ -3750,17 +4067,32 @@
             fitMapToGeoJSONGeometry(geomCap, maxZCap, { animate: false });
           }
 
+          /* Verrou anti-double-déclenchement moveend */
+          var __captureFired = false;
+          function fireCaptureOnce() {
+            if (__captureFired) return;
+            __captureFired = true;
+            setTimeout(function () { runHtml2CanvasCapture(false); }, 900);
+          }
+
           function runHtml2CanvasCapture(skipInverseMask) {
             beginAtlasMapCapture();
-            if (geomCap && !skipInverseMask) {
+            /**
+             * Masque SVG « monde blanc + trou » (fill-rule evenodd) : html2canvas peint souvent
+             * tout le rectangle opaque sans les trous → image entièrement blanche. Désactivé : le
+             * territoire ciblé reste le seul rempli grâce à beginAtlasMapCapture.
+             */
+            var atlasHtml2canvasUseInverseMask = false;
+            if (atlasHtml2canvasUseInverseMask && geomCap && !skipInverseMask) {
               addAtlasExportInverseMask(geomCap);
             }
             if (map && map.invalidateSize) map.invalidateSize(false);
             var captureBg = skipInverseMask
               ? "#ffffff"
-              : geomCap
-                ? "#ffffff"
+              : basemapIsSatellite
+                ? "#000000"
                 : "#03050c";
+            var lightWatermarkBg = !!skipInverseMask;
             var needWm =
               st.userType === "PUBLIC" || st.userType === "STUDENT";
             function restoreMapAfterCapture() {
@@ -3794,164 +4126,330 @@
             });
             atlasExportLog("CORS live map imgs", corsLive);
             atlasExportLog("devicePixelRatio", window.devicePixelRatio || 1);
-            requestAnimationFrame(function () {
+            var atlasExportRenderErrMsg =
+              "Erreur de rendu : Veuillez patienter que la carte soit totalement chargée avant d'exporter.";
+            atlasExportWhenMapboxReady(function () {
               requestAnimationFrame(function () {
-                html2canvas(capEl, {
-                  useCORS: true,
-                  allowTaint: false,
-                  backgroundColor: captureBg,
-                  logging: false,
-                  scale: html2CanvasScale,
-                  onclone: function (doc) {
-                    atlasExportSanitizeCloneDocForHtml2Canvas(doc);
-                    var clonedMap = doc.getElementById("map");
-                    if (clonedMap) {
-                      clonedMap.style.visibility = "visible";
-                      clonedMap.style.opacity = "1";
-                      var corsClone = atlasApplyCrossOriginToImages(clonedMap);
-                      var hid = atlasHideLikelyTaintingImagesInDoc(doc, "#map");
-                      atlasExportLog("onclone CORS imgs", corsClone);
-                      if (hid > 0) {
-                        atlasExportLog(
-                          "onclone masquées (hors tuiles Leaflet) imgs cross-origin",
-                          hid
-                        );
-                      }
+                requestAnimationFrame(function () {
+                  var capDims = atlasExportResolveCaptureSize(capEl);
+                  atlasExportLog("step3 capture dims (clone + html2canvas)", capDims);
+                  var deferCaptureOneFrame =
+                    useMbGlBase &&
+                    mbBaseMap &&
+                    typeof mbBaseMap.triggerRepaint === "function" &&
+                    (!basemapIsSatellite || atlasVue3dActive);
+                  try {
+                    if (deferCaptureOneFrame) {
+                      mbBaseMap.triggerRepaint();
                     }
-                  },
-                })
-                  .then(function (canvas) {
-                    var capCenter = map.getCenter();
-                    var capZoom = map.getZoom();
-                    drawAtlasWatermarkLogo(
-                      canvas,
-                      needWm,
-                      capCenter,
-                      capZoom,
-                      function (c) {
-                        var imgData;
-                        try {
-                          atlasExportLog("avant toDataURL — canvas", {
-                            width: c.width,
-                            height: c.height,
-                          });
-                          imgData = c.toDataURL("image/png");
-                        } catch (eTd) {
-                          atlasExportErr(
-                            "toDataURL après capture (canvas corrompu / tainted)",
-                            eTd
-                          );
-                          var tdMsg =
-                            eTd && eTd.message
-                              ? eTd.message
-                              : String(eTd);
-                          showAtlasToast("toDataURL : " + tdMsg);
-                          try {
-                            alert(
-                              "IlèTô — erreur toDataURL (copiez pour diagnostic):\n\n" +
-                                tdMsg +
-                                (eTd && eTd.stack
-                                  ? "\n\n" + eTd.stack
-                                  : "")
-                            );
-                          } catch (eAtd) {
-                            /* */
-                          }
-                          restoreMapAfterCapture();
-                          doneUnlock();
-                          return;
-                        }
-                        restoreMapAfterCapture();
-                        if (fmt === "image_png") {
-                          var fname =
-                            "IlèTô_Export_" + slugExportName(label) + ".png";
-                          atlasForcePngDataUrlDownload(c, fname);
-                          doneUnlock();
-                          return;
-                        }
-                        if (fmt === "image_pdf") {
-                          var jsPDFFactory =
-                            window.jspdf && window.jspdf.jsPDF
-                              ? window.jspdf.jsPDF
-                              : null;
-                          if (!jsPDFFactory) {
-                            showAtlasToast("jsPDF indisponible.");
-                            doneUnlock();
-                            return;
-                          }
-                          var doc = new jsPDFFactory({
-                            orientation: "portrait",
-                            unit: "mm",
-                            format: "a4",
-                          });
-                          var title =
-                            "IlèTô Atlas — " +
-                            (st.departmentName || "") +
-                            (st.communeName ? " · " + st.communeName : "");
-                          doc.setFontSize(11);
-                          doc.text(title, 14, 16);
-                          if (includeMeta) {
-                            doc.setFontSize(8);
-                            doc.text(
-                              "Généré : " + new Date().toISOString(),
-                              14,
-                              22
-                            );
-                          }
-                          var pageW = doc.internal.pageSize.getWidth();
-                          var imgW = pageW - 20;
-                          var imgH = (c.height / c.width) * imgW;
-                          doc.addImage(
-                            imgData,
-                            "PNG",
-                            10,
-                            28,
-                            imgW,
-                            Math.min(imgH, 200)
-                          );
-                          doc.save(
-                            "IlèTô_Atlas_" + slugExportName(label) + ".pdf"
-                          );
-                          showAtlasToast("PDF Atlas exporté.");
-                          doneUnlock();
-                        }
-                      }
+                  } catch (eRp2) {
+                    /* */
+                  }
+                  function runH2C() {
+                    var docEl = document.documentElement;
+                    var mapNode = document.getElementById("map");
+                    var h2cW =
+                      mapNode && mapNode.offsetWidth >= 2
+                        ? mapNode.offsetWidth
+                        : capDims.w;
+                    var h2cH =
+                      mapNode && mapNode.offsetHeight >= 2
+                        ? mapNode.offsetHeight
+                        : capDims.h;
+                    var h2cDims = { w: h2cW, h: h2cH };
+                    var clientW =
+                      docEl && docEl.clientWidth
+                        ? docEl.clientWidth
+                        : window.innerWidth || h2cW;
+                    var clientH =
+                      docEl && docEl.clientHeight
+                        ? docEl.clientHeight
+                        : window.innerHeight || h2cH;
+                    var scrollNegY = -(
+                      (typeof window.scrollY === "number"
+                        ? window.scrollY
+                        : window.pageYOffset) || 0
                     );
+                    atlasExportLog("step3b html2canvas viewport", {
+                      h2cDims: h2cDims,
+                      clientW: clientW,
+                      clientH: clientH,
+                      scrollY: -scrollNegY,
+                      scrollYOption: scrollNegY,
+                    });
+                    html2canvas(capEl, {
+                    useCORS: true,
+                    allowTaint: false,
+                    backgroundColor: captureBg,
+                    logging: true,
+                    scale: 1,
+                    scrollX: 0,
+                    scrollY: scrollNegY,
+                    windowWidth: clientW,
+                    windowHeight: clientH,
+                    width: h2cW,
+                    height: h2cH,
+                    onclone: function (doc) {
+                      atlasExportSanitizeCloneDocForHtml2Canvas(doc);
+                      atlasExportApplyCloneMapDimensions(doc, h2cDims);
+                      var mapClone = doc.getElementById("map");
+                      var satExport = !!basemapIsSatellite;
+                      var solidBg = satExport ? "#000000" : "#03050c";
+                      if (mapClone) {
+                        mapClone.style.height = h2cH + "px";
+                        mapClone.style.width = h2cW + "px";
+                        mapClone.style.margin = "0";
+                        mapClone.style.padding = "0";
+                        mapClone.style.boxSizing = "border-box";
+                        mapClone.style.maxWidth = "100%";
+                        mapClone.style.maxHeight = "100%";
+                        mapClone.style.setProperty("background", solidBg, "important");
+                        mapClone.style.setProperty("background-color", solidBg, "important");
+                      }
+                      var lcClone = doc.querySelector("#map .leaflet-container");
+                      if (lcClone) {
+                        lcClone.style.setProperty("background", solidBg, "important");
+                        lcClone.style.setProperty("background-color", solidBg, "important");
+                      }
+                      var mbClone = doc.getElementById("atlas-mb-base");
+                      if (mbClone && satExport) {
+                        mbClone.style.setProperty("visibility", "visible", "important");
+                        mbClone.style.setProperty("background", "#000000", "important");
+                        mbClone.style.setProperty("z-index", "1", "important");
+                      }
+                      try {
+                        var liveCanvas =
+                          document.querySelector("#atlas-mb-base .mapboxgl-canvas") ||
+                          document.querySelector(".mapboxgl-canvas");
+                        var cloneContainer =
+                          doc.querySelector("#atlas-mb-base .mapboxgl-canvas-container") ||
+                          doc.querySelector(".mapboxgl-canvas-container");
+                        if (
+                          liveCanvas &&
+                          cloneContainer &&
+                          typeof liveCanvas.toDataURL === "function"
+                        ) {
+                          var snap = liveCanvas.toDataURL("image/png");
+                          if (!snap || snap.length < 5000) {
+                            atlasExportLog(
+                              "onclone mapbox snapshot trop court, skip",
+                              snap ? snap.length : 0
+                            );
+                          } else {
+                            var snapImg = doc.createElement("img");
+                            snapImg.src = snap;
+                            snapImg.setAttribute("alt", "");
+                            snapImg.style.width = "100%";
+                            snapImg.style.height = "100%";
+                            snapImg.style.position = "absolute";
+                            snapImg.style.top = "0";
+                            snapImg.style.left = "0";
+                            snapImg.style.display = "block";
+                            snapImg.style.objectFit = "fill";
+                            snapImg.style.setProperty("z-index", "2", "important");
+                            cloneContainer.innerHTML = "";
+                            cloneContainer.appendChild(snapImg);
+                          }
+                        }
+                      } catch (eMbSnap) {
+                        atlasExportLog("onclone mapbox canvas snapshot skip", String(eMbSnap));
+                      }
+                      var clonedMap = doc.getElementById("map");
+                      if (clonedMap) {
+                        clonedMap.style.visibility = "visible";
+                        clonedMap.style.opacity = "1";
+                        var corsClone = atlasApplyCrossOriginToImages(clonedMap);
+                        var hid = atlasHideLikelyTaintingImagesInDoc(doc, "#map");
+                        atlasExportLog("onclone CORS imgs", corsClone);
+                        if (hid > 0) {
+                          atlasExportLog(
+                            "onclone masquées (hors tuiles Leaflet) imgs cross-origin",
+                            hid
+                          );
+                        }
+                      }
+                    },
                   })
-                  .catch(function (err) {
-                    atlasExportErr("html2canvas échec (voir stack: mémoire, tainted, etc.)", err);
-                    restoreMapAfterCapture();
-                    if (!skipInverseMask && geomCap) {
-                      showAtlasToast(
-                        "Nouvel essai sans masque d’export…"
+                    .then(function (canvas) {
+                      var capCenter = map.getCenter();
+                      var capZoom = map.getZoom();
+                      requestAnimationFrame(function () {
+                        drawAtlasWatermarkLogo(
+                          canvas,
+                          needWm,
+                          capCenter,
+                          capZoom,
+                          lightWatermarkBg,
+                          function (c) {
+                            setTimeout(function () {
+                              var imgData;
+                              try {
+                                atlasExportLog("avant toDataURL — canvas", {
+                                  width: c && c.width,
+                                  height: c && c.height,
+                                });
+                                if (
+                                  !c ||
+                                  c.width < 2 ||
+                                  c.height < 2
+                                ) {
+                                  showAtlasToast(atlasExportRenderErrMsg);
+                                  atlasExportLog(
+                                    "toDataURL annulé — canvas trop petit",
+                                    null
+                                  );
+                                  restoreMapAfterCapture();
+                                  doneUnlock();
+                                  return;
+                                }
+                                imgData = c.toDataURL("image/png");
+                              } catch (eTd) {
+                                atlasExportErr(
+                                  "toDataURL après capture (canvas corrompu / tainted)",
+                                  eTd
+                                );
+                                var tdMsg =
+                                  eTd && eTd.message
+                                    ? eTd.message
+                                    : String(eTd);
+                                showAtlasToast("toDataURL : " + tdMsg);
+                                try {
+                                  alert(
+                                    "IlèTô — erreur toDataURL (copiez pour diagnostic):\n\n" +
+                                      tdMsg +
+                                      (eTd && eTd.stack
+                                        ? "\n\n" + eTd.stack
+                                        : "")
+                                  );
+                                } catch (eAtd) {
+                                  /* */
+                                }
+                                restoreMapAfterCapture();
+                                doneUnlock();
+                                return;
+                              }
+                              if (atlasExportDataUrlLooksEmpty(imgData)) {
+                                showAtlasToast(atlasExportRenderErrMsg);
+                                atlasExportLog(
+                                  "toDataURL suspect (chaîne trop courte)",
+                                  imgData ? imgData.length : 0
+                                );
+                                restoreMapAfterCapture();
+                                doneUnlock();
+                                return;
+                              }
+                              restoreMapAfterCapture();
+                              if (fmt === "image_png") {
+                                var fname =
+                                  "IlèTô_Export_" + slugExportName(label) + ".png";
+                                atlasForcePngDataUrlDownload(c, fname);
+                                doneUnlock();
+                                return;
+                              }
+                              if (fmt === "image_pdf") {
+                                var jsPDFFactory =
+                                  window.jspdf && window.jspdf.jsPDF
+                                    ? window.jspdf.jsPDF
+                                    : null;
+                                if (!jsPDFFactory) {
+                                  showAtlasToast("jsPDF indisponible.");
+                                  doneUnlock();
+                                  return;
+                                }
+                                var doc = new jsPDFFactory({
+                                  orientation: "portrait",
+                                  unit: "mm",
+                                  format: "a4",
+                                });
+                                var title =
+                                  "IlèTô Atlas — " +
+                                  (st.departmentName || "") +
+                                  (st.communeName ? " · " + st.communeName : "");
+                                doc.setFontSize(11);
+                                doc.text(title, 14, 16);
+                                if (includeMeta) {
+                                  doc.setFontSize(8);
+                                  doc.text(
+                                    "Généré : " + new Date().toISOString(),
+                                    14,
+                                    22
+                                  );
+                                }
+                                var pageW = doc.internal.pageSize.getWidth();
+                                var imgW = pageW - 20;
+                                var imgH = (c.height / c.width) * imgW;
+                                doc.addImage(
+                                  imgData,
+                                  "PNG",
+                                  10,
+                                  28,
+                                  imgW,
+                                  Math.min(imgH, 200)
+                                );
+                                doc.save(
+                                  "IlèTô_Atlas_" + slugExportName(label) + ".pdf"
+                                );
+                                showAtlasToast("PDF Atlas exporté.");
+                                doneUnlock();
+                              }
+                            }, 2000);
+                          }
+                        );
+                      });
+                    })
+                    .catch(function (err) {
+                      atlasExportErr(
+                        "html2canvas échec (voir stack: mémoire, tainted, etc.)",
+                        err
                       );
-                      setTimeout(function () {
-                        runHtml2CanvasCapture(true);
-                      }, 500);
-                      return;
-                    }
-                    var errMsg =
-                      err && err.message ? err.message : String(err);
-                    var errStack = err && err.stack ? err.stack : "";
-                    showAtlasToast("Capture html2canvas : " + errMsg);
-                    try {
-                      alert(
-                        "IlèTô — erreur html2canvas (copiez-collez pour diagnostic):\n\n" +
-                          errMsg +
-                          (errStack ? "\n\n" + errStack : "")
-                      );
-                    } catch (eAl) {
-                      /* */
-                    }
-                    doneUnlock();
-                  });
+                      restoreMapAfterCapture();
+                      if (!skipInverseMask && geomCap) {
+                        showAtlasToast(
+                          "Nouvel essai sans masque d’export…"
+                        );
+                        setTimeout(function () {
+                          runHtml2CanvasCapture(true);
+                        }, 500);
+                        return;
+                      }
+                      var errMsg =
+                        err && err.message ? err.message : String(err);
+                      var errStack = err && err.stack ? err.stack : "";
+                      showAtlasToast("Capture html2canvas : " + errMsg);
+                      try {
+                        alert(
+                          "IlèTô — erreur html2canvas (copiez-collez pour diagnostic):\n\n" +
+                            errMsg +
+                            (errStack ? "\n\n" + errStack : "")
+                        );
+                      } catch (eAl) {
+                        /* */
+                      }
+                      doneUnlock();
+                    });
+                  }
+                  if (deferCaptureOneFrame) {
+                    requestAnimationFrame(runH2C);
+                  } else {
+                    runH2C();
+                  }
+                });
               });
             });
           }
 
-          setTimeout(function () {
-            runHtml2CanvasCapture(false);
-          }, geomCap ? 500 : 0);
+          if (geomCap) {
+            /* Attendre la fin du déplacement de carte avant de capturer */
+            map.once("moveend", function () {
+              fireCaptureOnce();
+            });
+            /* Fallback si moveend ne se déclenche pas (carte déjà positionnée) */
+            setTimeout(function () {
+              fireCaptureOnce();
+            }, 1800);
+          } else {
+            setTimeout(function () { runHtml2CanvasCapture(false); }, 0);
+          }
           return;
         }
       } catch (e) {
@@ -3968,62 +4466,90 @@
     var openB = root ? root.querySelector("[data-atlas-open-basemap]") : null;
     var openE = root ? root.querySelector("[data-atlas-open-extras]") : null;
     if (!root) return;
+
     function closeFlyouts() {
       if (bf) bf.classList.add("hidden");
       if (ef) ef.classList.add("hidden");
       if (openB) openB.setAttribute("aria-expanded", "false");
       if (openE) openE.setAttribute("aria-expanded", "false");
     }
-    document.addEventListener("click", function () {
+
+    /* Fermeture en cliquant en dehors : phase capture sur document pour ne pas dépendre du bubble.
+       Tout clic dont la cible est dans #perspective-switcher (boutons, flyouts basemap/extras) est ignoré. */
+    document.addEventListener("click", function (e) {
+      if (root.contains(e.target)) return;
       closeFlyouts();
-    });
-    root.addEventListener("click", function (e) {
-      e.stopPropagation();
-    });
+    }, true);
+
+    /* Feedback visuel : marque le basemap actif dans le flyout */
+    function updateBasemapActiveUI(key) {
+      if (!bf) return;
+      Array.prototype.forEach.call(bf.querySelectorAll("[data-basemap]"), function (btn) {
+        var k = btn.getAttribute("data-basemap");
+        var active =
+          (k === "satellite" && key === "satellite") ||
+          (k === "administrative" && key === "administrative") ||
+          (k === "dark" && key === "dark");
+        btn.classList.toggle("text-primary", active);
+        btn.classList.toggle("bg-primary/10", active);
+        btn.classList.toggle("border-primary/40", active);
+        btn.classList.toggle("active-basemap", active);
+      });
+    }
+
+    window.__atlasRefreshBasemapFlyout = function (key) {
+      updateBasemapActiveUI(key || atlasBasemapFlyoutKey());
+    };
+    updateBasemapActiveUI(atlasBasemapFlyoutKey());
+
     Array.prototype.forEach.call(
       root.querySelectorAll("[data-layer-toggle]"),
       function (b) {
         b.addEventListener("click", closeFlyouts);
       }
     );
+
     if (openB && bf) {
       openB.addEventListener("click", function (e) {
         e.stopPropagation();
-        var otherOpen = ef && !ef.classList.contains("hidden");
-        if (otherOpen) {
-          ef.classList.add("hidden");
-          if (openE) openE.setAttribute("aria-expanded", "false");
+        var isOpen = !bf.classList.contains("hidden");
+        closeFlyouts();
+        if (!isOpen) {
+          bf.classList.remove("hidden");
+          openB.setAttribute("aria-expanded", "true");
         }
-        var opening = bf.classList.contains("hidden");
-        bf.classList.toggle("hidden", !opening);
-        openB.setAttribute("aria-expanded", opening ? "true" : "false");
       });
     }
+
     if (openE && ef) {
       openE.addEventListener("click", function (e) {
         e.stopPropagation();
-        var otherOpen = bf && !bf.classList.contains("hidden");
-        if (otherOpen) {
-          bf.classList.add("hidden");
-          if (openB) openB.setAttribute("aria-expanded", "false");
+        var isOpen = !ef.classList.contains("hidden");
+        closeFlyouts();
+        if (!isOpen) {
+          ef.classList.remove("hidden");
+          openE.setAttribute("aria-expanded", "true");
         }
-        var opening = ef.classList.contains("hidden");
-        ef.classList.toggle("hidden", !opening);
-        openE.setAttribute("aria-expanded", opening ? "true" : "false");
       });
     }
+
     if (bf) {
       bf.addEventListener("click", function (e) {
         var t = e.target.closest("[data-basemap]");
         if (!t) return;
         e.stopPropagation();
         var k = t.getAttribute("data-basemap");
-        if (k === "satellite") switchBasemap("satellite");
-        else if (k === "administrative") switchBasemap("administrative");
-        else switchBasemap("dark");
+        if (k === "satellite") {
+          switchBasemap("satellite");
+        } else if (k === "administrative") {
+          switchBasemap("administrative");
+        } else {
+          switchBasemap("dark");
+        }
         closeFlyouts();
       });
     }
+
     if (ef) {
       ef.addEventListener("click", function (e) {
         var t = e.target.closest("[data-extra-layer]");

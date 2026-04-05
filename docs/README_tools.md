@@ -316,6 +316,54 @@ out skel qt;
 - **Bundle ZIP côté client** : GeoJSON + métadonnées + `.prj` (voir moteur export navigateur).
 - **Shapefile natif serveur** : `GET /geo/api/export/shapefile/<territory_type>/<territory_id>/` avec `territory_type` ∈ `commune` | `zone` | `quartier` ; accès typiquement **PROFESSIONAL** / **INSTITUTION** ; archive ZIP avec `.shp`, `.shx`, `.dbf`, `.prj` (EPSG:4326). Dépend de **GDAL** + **GeoPandas** côté serveur.
 
+### Export PNG / PDF (vue carte — `templates/website/atlas.html`)
+
+La capture utilise **html2canvas** sur l’élément `#map` (Leaflet + fond Mapbox GL sous-jacent). Les écueils classiques sont une image **blanche** (buffer WebGL vidé), une image **coupée** (scroll / hauteur document), ou un fond Mapbox **invisible** sous les couches Leaflet.
+
+**Mapbox GL**
+
+- Sur `new mapboxgl.Map`, conserver au minimum **`preserveDrawingBuffer: true`** (sinon `toDataURL` et la copie WebGL peuvent être vides). Utile aussi : `failIfMajorPerformanceCaveat: false`, `antialias: true`.
+- Avant la capture : **`triggerRepaint()`** puis, si besoin, un **`requestAnimationFrame`** pour laisser une frame se peindre.
+
+**html2canvas — cadrage sur la carte (éviter page infinie / blanc)**
+
+- **`width` / `height`** : dimensions du conteneur réel, en pratique **`#map.offsetWidth`** / **`#map.offsetHeight`** (repli sur une résolution dérivée du layout si trop petit).
+- **`windowWidth` / `windowHeight`** : **`document.documentElement.clientWidth`** / **`clientHeight`** (viewport document, pas toute la hauteur scrollable).
+- **`scrollX: 0`** et **`scrollY: -window.scrollY`** (ou équivalent `pageYOffset`) pour compenser le défilement de la page et éviter un décalage ou une zone vide.
+- **`scale: 1`** dans la config actuelle (export fidèle à la taille logique de la carte ; augmenter avec prudence : mémoire).
+
+**Clone DOM (`onclone`)**
+
+- Nettoyage CSS incompatible avec html2canvas (ex. **OKLCH** / `color-mix` dans les styles calculés) : fonction **`atlasExportSanitizeCloneDocForHtml2Canvas`**.
+- Réinjecter des tailles explicites sur le clone (wrap `#map`, **`.leaflet-container`**, **`#atlas-mb-base`**) lorsque les feuilles de style sont retirées : **`atlasExportApplyCloneMapDimensions`**.
+- Verrouillage visuel du clone **`#map`** : marges / padding à 0, dimensions pilotées pour ne pas « exploser » le layout (repère : `window.innerWidth` / **`innerHeight`** sur le clone après les dimensions carte).
+- **Fond Mapbox** : dans le clone, remplacer le **canvas** `.mapboxgl-canvas` par une **`<img src="…">`** issue du **`toDataURL('image/png')`** du canvas **live** (conteneur `.mapboxgl-canvas-container`), pour figer les pixels indépendamment du rendu WebGL dans le document cloné.
+
+**Filigrane**
+
+- Dessin **après** la promesse **`html2canvas`** (canvas bitmap prêt), idéalement après un **`requestAnimationFrame`**.
+- Texte **« IlèTô Atlas »** en bas à droite : **`textAlign = 'right'`**, **`textBaseline = 'bottom'`**, **`fillText(..., canvas.width - 20, canvas.height - 20)`** ; ligne secondaire (centre / zoom) au-dessus si besoin.
+
+**Débogage**
+
+- **`logging: true`** sur l’appel html2canvas : journaux détaillés dans la console ; repasser à **`false`** en production si la verbosité gêne.
+
+**Piège corrigé (export « blanc » avec seuls des noms de départements gris)**
+
+- Avant la capture, **`beginAtlasMapCapture()`** atténue les territoires non concernés (fill à 0) et ne laisse visible que le territoire **sélectionné**.
+- La sélection carte (`selectedDeptPk` / `selectedCommunePk`) n’était pas toujours renseignée si l’utilisateur avait choisi le territoire **uniquement via l’état** (`departmentId` / `communeId` dans `IlletoAtlas.getState()`), par ex. export depuis le panneau sans clic sur le polygone.
+- Dans ce cas, **aucun** polygone ne recevait de remplissage → fond blanc + éventuellement les **seuls libellés** (marqueurs HTML), très pâles après html2canvas.
+- Le code aligne donc la clé utilisée pour le surlignage sur **`selectedDeptPk` ou `st.departmentId`** (idem communes).
+- L’identifiant de feature doit suivre le même ordre que le dropdown : **`feature.id` → `properties.pk` → `properties.id`** (`atlasExportFeatureId`, comme `featureDepartmentPk` côté `scripts.js`).
+
+**Masque inverse (vignette blanche hors territoire)**
+
+- Un masque Leaflet GeoJSON en **fill-rule `evenodd`** peut être rendu par html2canvas comme un **rectangle blanc plein** (trous ignorés), d’où une capture **entièrement blanche**. Il est **désactivé** pour la voie html2canvas (`atlasHtml2canvasUseInverseMask = false` dans `atlas.html`) ; seul le style de **`beginAtlasMapCapture`** isole visuellement le territoire.
+
+**Filigrane invisible sur fond blanc**
+
+- Avec **`backgroundColor: #ffffff`**, un texte en **`#FFFFFF`** est invisible. Si le fond d’export est clair, le filigrane passe en **texte foncé** + léger contour clair.
+
 ### Couches et analyses
 
 - **Zones / quartiers** : `GET /geo/api/zones/geojson/?commune_id=<pk>` (propriété `kind` : `zone` / `quartier`).
