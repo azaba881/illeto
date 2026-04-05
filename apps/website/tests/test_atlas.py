@@ -21,4 +21,12 @@ class AtlasPageTests(SimpleTestCase):
         self.assertContains(r, "atlasForcePngDataUrlDownload")
         self.assertContains(r, "atlasTerritories")
         self.assertContains(r, "atlasLabels")
-        self.assertContains(r, "html2CanvasScale")
+        self.assertContains(r, "runPlaywrightExport")
+
+    def test_atlas_export_capture_disabled_returns_503(self):
+        r = Client().post(
+            reverse("website:atlas_export_capture"),
+            data={},
+            content_type="application/json",
+        )
+        self.assertEqual(r.status_code, 503)

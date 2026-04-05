@@ -34,6 +34,28 @@ ILLETO_GEO_INCLUDE_PLACEHOLDER_COMMUNES = env.bool(
 # Atlas : surcouches Mapbox (trafic, fonds raster Mapbox). Laisser vide = replis OSM/Carto.
 ILLETO_MAPBOX_ACCESS_TOKEN = env("ILLETO_MAPBOX_ACCESS_TOKEN", default="")
 
+# Export Atlas headless (Playwright). False par défaut — activer en prod après `playwright install chromium`.
+ILLETO_PLAYWRIGHT_EXPORT_ENABLED = env.bool(
+    "ILLETO_PLAYWRIGHT_EXPORT_ENABLED", default=False
+)
+ILLETO_ATLAS_EXPORT_CACHE_DIR = env(
+    "ILLETO_ATLAS_EXPORT_CACHE_DIR", default="var/atlas_export_cache"
+)
+ILLETO_ATLAS_EXPORT_CACHE_TTL = env.int(
+    "ILLETO_ATLAS_EXPORT_CACHE_TTL", default=86400
+)
+ILLETO_EXPORT_MAX_CONCURRENT = env.int("ILLETO_EXPORT_MAX_CONCURRENT", default=2)
+ILLETO_ATLAS_EXPORT_MAX_CLIP = env.int("ILLETO_ATLAS_EXPORT_MAX_CLIP", default=2400)
+ILLETO_ATLAS_EXPORT_DEVICE_SCALE = env.float(
+    "ILLETO_ATLAS_EXPORT_DEVICE_SCALE", default=2.0
+)
+ILLETO_ATLAS_EXPORT_TIMEOUT_MS = env.int(
+    "ILLETO_ATLAS_EXPORT_TIMEOUT_MS", default=120000
+)
+ILLETO_ATLAS_EXPORT_POST_IDLE_MS = env.int(
+    "ILLETO_ATLAS_EXPORT_POST_IDLE_MS", default=800
+)
+
 # Imports géographiques (chemins relatifs au BASE_DIR ; laisser vide = pas de défaut)
 ILLETO_HDX_ADM1_PATH = env("ILLETO_HDX_ADM1_PATH", default="")
 ILLETO_HDX_ADM2_PATH = env("ILLETO_HDX_ADM2_PATH", default="")
