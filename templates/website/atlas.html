@@ -709,6 +709,10 @@
             <input type="checkbox" id="export-opt-hires" class="w-4 h-4 rounded border-glass-border accent-[#00875a]" />
             <span class="text-xs text-foreground">Haute résolution (300&nbsp;dpi)</span>
           </label>
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" id="export-opt-pure-map" class="w-4 h-4 rounded border-glass-border accent-[#00875a]" />
+            <span class="text-xs text-foreground">Carte pure (PNG/PDF sans surbrillance territoire)</span>
+          </label>
         </div>
         <div class="flex flex-wrap gap-2 justify-end">
           <button type="button" id="atlas-export-modal-cancel" class="px-4 py-2 rounded-lg text-sm text-muted-foreground hover:bg-secondary/50 transition-colors">Fermer</button>
@@ -1337,12 +1341,16 @@
 
   if (useMbGlBase) {
     mapboxgl.accessToken = ILLETO_MAPBOX_TOKEN;
+    var __atlasHeadlessExport =
+      typeof window.__ILLETO_ATLAS_HEADLESS_EXPORT__ !== "undefined" &&
+      window.__ILLETO_ATLAS_HEADLESS_EXPORT__ === true;
     mbBaseMap = new mapboxgl.Map({
       container: "atlas-mb-base",
       style: mapboxBasemapStyleUrl(false),
       center: [2.3, 9.3],
       zoom: 7,
-      interactive: true,
+      interactive: !__atlasHeadlessExport,
+      cooperativeGestures: !__atlasHeadlessExport,
       attributionControl: true,
       /* Export PNG/PDF : buffer WebGL conservé pour toDataURL / capture sync. */
       preserveDrawingBuffer: true,
@@ -1579,7 +1587,9 @@
           setTimeout(finish, 3200);
         }
 
-        beginAtlasMapCapture();
+        if (!cfg.hideSelectionStyle) {
+          beginAtlasMapCapture();
+        }
         if (cfg.vue3d) {
           setAtlasVue3dMode(true);
         } else {
@@ -2661,13 +2671,23 @@
         if (!lyr.feature) return;
         var fid = atlasExportFeatureId(lyr.feature);
         var sel = capDeptPk && fid === capDeptPk;
-        lyr.setStyle({
-          color: sel ? "#007BFF" : "#00875a",
-          weight: sel ? 3 : 0,
-          opacity: sel ? 1 : 0,
-          fillColor: sel ? "#007BFF" : "#00875a",
-          fillOpacity: sel ? 0.28 : 0,
-        });
+        lyr.setStyle(
+          sel
+            ? {
+                color: "#007BFF",
+                weight: 3,
+                opacity: 1,
+                fillColor: "#007BFF",
+                fillOpacity: 0.28,
+              }
+            : {
+                color: "transparent",
+                weight: 0,
+                opacity: 0,
+                fillColor: "transparent",
+                fillOpacity: 0,
+              }
+        );
       });
     }
     if (activeCommunesLayer) {
@@ -2675,13 +2695,23 @@
         if (!lyr.feature) return;
         var cid = atlasExportFeatureId(lyr.feature);
         var sel = capCommunePk && cid === capCommunePk;
-        lyr.setStyle({
-          color: sel ? "#007BFF" : "#00875a",
-          weight: sel ? 3 : 0,
-          opacity: sel ? 1 : 0,
-          fillColor: sel ? "#007BFF" : "#00875a",
-          fillOpacity: sel ? 0.24 : 0,
-        });
+        lyr.setStyle(
+          sel
+            ? {
+                color: "#007BFF",
+                weight: 3,
+                opacity: 1,
+                fillColor: "#007BFF",
+                fillOpacity: 0.24,
+              }
+            : {
+                color: "transparent",
+                weight: 0,
+                opacity: 0,
+                fillColor: "transparent",
+                fillOpacity: 0,
+              }
+        );
       });
     }
     return true;
@@ -4177,6 +4207,17 @@
                   ? String(st.departmentId)
                   : null;
 
+          var pureEl = document.getElementById("export-opt-pure-map");
+          var hideSelectionStyle = !!(pureEl && pureEl.checked);
+          var mapHighlightActive = !!(
+            selectedDeptPk ||
+            selectedCommunePk ||
+            (st.neighborhood != null && String(st.neighborhood) !== "")
+          );
+          if (!mapHighlightActive) {
+            hideSelectionStyle = true;
+          }
+
           var exportPayload = {
             format: fmt === "image_pdf" ? "pdf" : "png",
             center: { lat: c0.lat, lng: c0.lng },
@@ -4186,6 +4227,9 @@
             bearing: bearingVal,
             vue3d: !!atlasVue3dActive,
             selected_feature_id: selFeat,
+            hideSelectionStyle: hideSelectionStyle,
+            nom_departement: (st.departmentName && String(st.departmentName).trim()) || "",
+            export_user_label: "",
             map_state: st,
             viewport: {
               width: window.innerWidth,

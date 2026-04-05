@@ -55,6 +55,13 @@ ILLETO_ATLAS_EXPORT_TIMEOUT_MS = env.int(
 ILLETO_ATLAS_EXPORT_POST_IDLE_MS = env.int(
     "ILLETO_ATLAS_EXPORT_POST_IDLE_MS", default=800
 )
+# Badge PDF (JPG) — placer le fichier sous static/img/ ou renseigner un chemin absolu.
+ILLETO_ATLAS_PDF_BADGE_PATH = env(
+    "ILLETO_ATLAS_PDF_BADGE_PATH",
+    default=str(
+        BASE_DIR / "static" / "img" / "Filigrane Badge-Transparent.jpg"
+    ),
+)
 
 # Imports géographiques (chemins relatifs au BASE_DIR ; laisser vide = pas de défaut)
 ILLETO_HDX_ADM1_PATH = env("ILLETO_HDX_ADM1_PATH", default="")

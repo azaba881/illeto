@@ -49,6 +49,46 @@ def _validate_atlas_export_payload(body: dict) -> str | None:
     return None
 
 
+def _merge_atlas_export_nom_departement(body: dict) -> None:
+    if (body.get("nom_departement") or "").strip():
+        return
+    ms = body.get("map_state")
+    if not isinstance(ms, dict):
+        return
+    dn = ms.get("departmentName")
+    if dn:
+        body["nom_departement"] = str(dn).strip()
+
+
+def _merge_atlas_export_user_label(request, body: dict) -> None:
+    """Renseigne l’utilisateur pour le PDF et la clé de cache (évite collisions entre comptes)."""
+    if (body.get("export_user_label") or "").strip():
+        return
+    u = getattr(request, "user", None)
+    if u and u.is_authenticated:
+        fn = (u.get_full_name() or "").strip()
+        body["export_user_label"] = fn or (getattr(u, "email", None) or "") or str(
+            u.pk
+        )
+
+
+def _merge_atlas_export_hide_selection_style(body: dict) -> None:
+    """
+    Carte « pure » côté Playwright si aucun territoire dans map_state :
+    pas de surbrillance export même si le client omet la clé.
+    """
+    ms = body.get("map_state")
+    if not isinstance(ms, dict):
+        return
+    has_territory = bool(
+        ms.get("departmentId")
+        or ms.get("communeId")
+        or (ms.get("neighborhood") not in (None, ""))
+    )
+    if not has_territory:
+        body["hideSelectionStyle"] = True
+
+
 class AtlasExportView(View):
     """POST JSON → PNG ou PDF (capture Playwright côté serveur)."""
 
@@ -73,6 +113,10 @@ class AtlasExportView(View):
         err = _validate_atlas_export_payload(body)
         if err:
             return JsonResponse({"detail": err}, status=400)
+
+        _merge_atlas_export_hide_selection_style(body)
+        _merge_atlas_export_nom_departement(body)
+        _merge_atlas_export_user_label(request, body)
 
         try:
             from apps.website.utils.export_service import capture_atlas_export

@@ -55,6 +55,9 @@ def normalize_export_payload_for_key(data: dict[str, Any]) -> dict[str, Any]:
         "vp_w": int(round(float(vp.get("width", 0)))),
         "vp_h": int(round(float(vp.get("height", 0)))),
         "selected_feature_id": data.get("selected_feature_id"),
+        "hide_selection": bool(data.get("hideSelectionStyle")),
+        "nom_dept": str(data.get("nom_departement") or ""),
+        "export_user": str(data.get("export_user_label") or ""),
     }
     fg = data.get("fit_geometry")
     if fg is not None:
@@ -106,19 +109,158 @@ def apply_png_watermark(png_bytes: bytes, text: str = "IlèTô Atlas") -> bytes:
     return out.getvalue()
 
 
-def png_bytes_to_pdf(png_bytes: bytes) -> bytes:
+def _register_pdf_unicode_fonts() -> tuple[str, str]:
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+
+    cache = getattr(_register_pdf_unicode_fonts, "_cache", None)
+    if cache:
+        return cache  # type: ignore[return-value]
+    reg = Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")
+    bd = Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf")
+    try:
+        if reg.is_file():
+            pdfmetrics.registerFont(TTFont("IlletoDejaVu", str(reg)))
+            if bd.is_file():
+                pdfmetrics.registerFont(TTFont("IlletoDejaVuBd", str(bd)))
+                _register_pdf_unicode_fonts._cache = ("IlletoDejaVu", "IlletoDejaVuBd")  # type: ignore[attr-defined]
+            else:
+                _register_pdf_unicode_fonts._cache = ("IlletoDejaVu", "IlletoDejaVu")  # type: ignore[attr-defined]
+            return _register_pdf_unicode_fonts._cache  # type: ignore[attr-defined]
+    except Exception:
+        pass
+    _register_pdf_unicode_fonts._cache = ("Helvetica", "Helvetica-Bold")  # type: ignore[attr-defined]
+    return _register_pdf_unicode_fonts._cache  # type: ignore[attr-defined]
+
+
+def png_bytes_to_pdf_atlas(
+    map_png_bytes: bytes,
+    *,
+    request,
+    payload: dict[str, Any],
+) -> bytes:
+    """A4 : cartouche sombre (badge + ILÊTÔ), titre officiel, métadonnées, carte bordée, pied de page."""
+    from datetime import datetime
+
     from PIL import Image
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4
     from reportlab.lib.utils import ImageReader
     from reportlab.pdfgen import canvas
 
-    buf = BytesIO(png_bytes)
-    im = Image.open(buf)
-    w, h = im.size
+    W, H = A4
+    margin = 40
+    header_h = 118
+    footer_h = 36
+    sep_pt = 1
+
+    font, font_bold = _register_pdf_unicode_fonts()
+
+    ctr = payload.get("center") or {}
+    try:
+        lat = float(ctr.get("lat", 0))
+        lng = float(ctr.get("lng", 0))
+    except (TypeError, ValueError):
+        lat, lng = 0.0, 0.0
+    nom_dept = (payload.get("nom_departement") or "").strip()
+    user_label = (payload.get("export_user_label") or "").strip()
+    if not user_label and getattr(request, "user", None) is not None:
+        u = request.user
+        if u.is_authenticated:
+            try:
+                fn = (u.get_full_name() or "").strip()
+            except Exception:
+                fn = ""
+            user_label = fn or (getattr(u, "email", None) or "") or str(u.pk)
+    if not user_label:
+        user_label = "Visiteur"
+
+    badge_path_str = getattr(settings, "ILLETO_ATLAS_PDF_BADGE_PATH", "") or ""
+    badge_path = Path(badge_path_str) if badge_path_str else None
+    if badge_path and not badge_path.is_file():
+        badge_path = None
+
     pdf_buf = BytesIO()
-    buf.seek(0)
-    c = canvas.Canvas(pdf_buf, pagesize=(w, h))
-    c.drawImage(ImageReader(buf), 0, 0, width=w, height=h)
-    c.save()
+    cnv = canvas.Canvas(pdf_buf, pagesize=A4)
+
+    header_bottom = H - header_h
+    cnv.setFillColor(colors.HexColor("#03050c"))
+    cnv.rect(0, header_bottom, W, header_h, fill=1, stroke=0)
+
+    badge_size = 50
+    badge_x = margin
+    badge_y = H - margin - badge_size
+    if badge_path and badge_path.is_file():
+        try:
+            cnv.drawImage(
+                str(badge_path),
+                badge_x,
+                badge_y,
+                width=badge_size,
+                height=badge_size,
+                mask="auto",
+            )
+        except Exception:
+            logger.debug("Badge PDF absent ou illisible", exc_info=True)
+
+    cnv.setFillColor(colors.HexColor("#e2e8f0"))
+    cnv.setFont(font, 8)
+    tag = "ILÊTÔ : INTELLIGENCE TERRITORIALE"
+    cnv.drawString(badge_x + badge_size + 10, H - margin - 18, tag)
+
+    title = "RAPPORT CARTOGRAPHIQUE OFFICIEL"
+    cnv.setFont(font_bold, 13)
+    tw = cnv.stringWidth(title, font_bold, 13)
+    cnv.drawString((W - tw) / 2, H - margin - 22, title)
+
+    cnv.setFont(font, 9)
+    if nom_dept:
+        dept_line = f"Département : {nom_dept}"
+        dw = cnv.stringWidth(dept_line, font, 9)
+        cnv.drawString((W - dw) / 2, H - margin - 38, dept_line)
+    coord_line = f"Centre de vue : {lat:.6f}°, {lng:.6f}°"
+    cw = cnv.stringWidth(coord_line, font, 9)
+    cnv.drawString((W - cw) / 2, H - margin - 52, coord_line)
+
+    now = datetime.now()
+    date_str = now.strftime("%d/%m/%Y %H:%M")
+    right_x = W - margin
+    cnv.setFont(font, 8)
+    cnv.drawRightString(right_x, H - margin - 18, date_str)
+    cnv.drawRightString(right_x, H - margin - 30, f"Utilisateur : {user_label}")
+    cnv.drawRightString(right_x, H - margin - 42, f"Lat. {lat:.5f}° / Long. {lng:.5f}°")
+
+    cnv.setStrokeColor(colors.HexColor("#00875a"))
+    cnv.setLineWidth(sep_pt)
+    line_y = header_bottom
+    cnv.line(margin, line_y, W - margin, line_y)
+
+    pil_im = Image.open(BytesIO(map_png_bytes))
+    iw, ih = pil_im.size
+    max_map_w = W - 2 * margin
+    max_map_h = H - header_h - footer_h - 50
+    scale = min(max_map_w / iw, max_map_h / ih)
+    draw_w = iw * scale
+    draw_h = ih * scale
+    ix = (W - draw_w) / 2
+    iy = footer_h + (max_map_h - draw_h) / 2
+
+    cnv.drawImage(
+        ImageReader(BytesIO(map_png_bytes)), ix, iy, width=draw_w, height=draw_h
+    )
+
+    cnv.setStrokeColor(colors.black)
+    cnv.setLineWidth(2)
+    cnv.rect(ix, iy, draw_w, draw_h, fill=0, stroke=1)
+
+    cnv.setFont(font, 8)
+    cnv.setFillColor(colors.HexColor("#475569"))
+    foot = f"Copyright {now.year} - IlèTô Atlas - Bénin"
+    fw = cnv.stringWidth(foot, font, 8)
+    cnv.drawString((W - fw) / 2, 22, foot)
+
+    cnv.showPage()
+    cnv.save()
     return pdf_buf.getvalue()
 
 
@@ -191,6 +333,7 @@ def capture_atlas_export(
         "vue3d": payload.get("vue3d", False),
         "fit_geometry": payload.get("fit_geometry"),
         "fit_max_zoom": payload.get("fit_max_zoom", 12),
+        "hideSelectionStyle": bool(payload.get("hideSelectionStyle")),
     }
 
     dpr = float(getattr(settings, "ILLETO_ATLAS_EXPORT_DEVICE_SCALE", 2))
@@ -220,6 +363,9 @@ def capture_atlas_export(
                     viewport={"width": vw, "height": vh},
                     device_scale_factor=dpr,
                     ignore_https_errors=True,
+                )
+                context.add_init_script(
+                    "window.__ILLETO_ATLAS_HEADLESS_EXPORT__ = true;"
                 )
                 if cookies:
                     context.add_cookies(cookies)
@@ -267,7 +413,7 @@ def capture_atlas_export(
 
     png_out = apply_png_watermark(png_out)
     if fmt == "pdf":
-        body = png_bytes_to_pdf(png_out)
+        body = png_bytes_to_pdf_atlas(png_out, request=request, payload=payload)
         mime = "application/pdf"
     else:
         body = png_out
