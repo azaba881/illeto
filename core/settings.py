@@ -25,6 +25,8 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 SECRET_KEY = env("SECRET_KEY", default="django-insecure-change-me-in-production")
 DEBUG = env("DEBUG")
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
+# Ex. https://ton-service.onrender.com (requis pour le POST / login en HTTPS)
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 
 # API geo : inclure les communes seed (is_placeholder=True). Par défaut = DEBUG (dev oui, prod non).
 ILLETO_GEO_INCLUDE_PLACEHOLDER_COMMUNES = env.bool(
@@ -111,6 +113,7 @@ LOGOUT_REDIRECT_URL = "/"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -227,6 +230,8 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+if not DEBUG:
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
@@ -285,6 +290,10 @@ ILLETO_PLAN_EXPORT_LIMITS = {
 }
 
 
-# Chemins vers les librairies système pour PostGIS/GDAL
-GDAL_LIBRARY_PATH = '/usr/lib/x86_64-linux-gnu/libgdal.so'
-GEOS_LIBRARY_PATH = '/usr/lib/x86_64-linux-gnu/libgeos_c.so'
+# PostGIS/GDAL (surcharge .env sur Docker / autres distro si besoin)
+GDAL_LIBRARY_PATH = env(
+    "GDAL_LIBRARY_PATH", default="/usr/lib/x86_64-linux-gnu/libgdal.so"
+)
+GEOS_LIBRARY_PATH = env(
+    "GEOS_LIBRARY_PATH", default="/usr/lib/x86_64-linux-gnu/libgeos_c.so"
+)

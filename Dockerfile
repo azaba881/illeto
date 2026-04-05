@@ -1,8 +1,17 @@
-FROM python:3.11-slim
+FROM python:3.11-slim-bookworm
 
-# Dépendances système pour Playwright
-RUN apt-get update && apt-get install -y \
-    wget gnupg libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 \
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV DJANGO_SETTINGS_MODULE=core.settings
+
+# GeoDjango (GDAL/GEOS/PROJ) + dépendances navigateur Playwright
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    binutils \
+    libproj25 libproj-dev \
+    gdal-bin libgdal-dev \
+    libgeos-c1v5 libgeos-dev \
+    wget gnupg \
+    libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 \
     libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 \
     libxext6 libxfixes3 libxrandr2 libgbm1 libasound2 \
     libpango-1.0-0 libcairo2 \
@@ -10,15 +19,17 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /code
 
-# Installation des libs Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Installation de Chromium pour les exports PDF
-RUN playwright install chromium
 RUN playwright install-deps chromium
+RUN playwright install chromium
 
 COPY . .
 
-# Port par défaut de Render
-CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:10000"]
+# Fichiers statiques (Atlas, admin CSS, etc.)
+ARG SECRET_KEY_BUILD=collectstatic-build-only
+RUN SECRET_KEY="${SECRET_KEY_BUILD}" python manage.py collectstatic --noinput
+
+# Render injecte PORT ; 10000 reste le repli local / render.yaml
+CMD ["sh", "-c", "gunicorn core.wsgi:application --bind 0.0.0.0:${PORT:-10000}"]

@@ -177,6 +177,8 @@ def png_bytes_to_pdf_atlas(
 
     badge_path_str = getattr(settings, "ILLETO_ATLAS_PDF_BADGE_PATH", "") or ""
     badge_path = Path(badge_path_str) if badge_path_str else None
+    if badge_path and not badge_path.is_absolute():
+        badge_path = Path(settings.BASE_DIR) / badge_path
     if badge_path and not badge_path.is_file():
         badge_path = None
 
