@@ -65,13 +65,16 @@
 {% block site_shell %}
 <div class="min-h-screen main-illeto-surface{% block surface_extra_class %}{% endblock %}">
     {% block site_header %}{% include "includes/header.html" %}{% endblock %}
+    {% include "includes/navigation/atlas_menu_overlay.html" %}
     {% block content %}{% endblock %}
     {% block site_footer %}{% include "includes/footer.html" %}{% endblock %}
 </div>
 {% endblock %}
 {% block extra_js %}
+<script>window.__ILLETO_ATLAS_PATH = "{% url 'website:atlas' %}";</script>
 <script src="https://unpkg.com/lucide@0.564.0/dist/umd/lucide.min.js"></script>
 <script src="{% static 'assets/js/scripts.js' %}"></script>
+<script src="{% static 'js/navigation_atlas.js' %}"></script>
 {% endblock %}
 </body>
 </html>

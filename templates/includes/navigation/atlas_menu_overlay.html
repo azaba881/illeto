@@ -1,0 +1,18 @@
+{% comment %}Overlay + panneau « Cartes & données ». ID atlas-layers-sidebar : masqué par défaut via CSS (translateX + visibility) jusqu’à .is-open.{% endcomment %}
+<div id="illeto-cartes-backdrop" class="illeto-cartes-backdrop" aria-hidden="true"></div>
+<aside
+  id="atlas-layers-sidebar"
+  class="illeto-cartes-sidebar flex flex-col glass-panel atlas-sidebar-shell border border-glass-border overflow-hidden text-foreground"
+  aria-hidden="true"
+  aria-labelledby="atlas-layers-sidebar-title"
+>
+  <div class="flex items-center justify-between gap-2 px-3 py-2.5 border-b border-glass-border shrink-0 bg-[#03050c]/85">
+    <h2 id="atlas-layers-sidebar-title" class="text-xs font-semibold tracking-wide text-foreground">Cartes &amp; données</h2>
+    <button type="button" id="atlas-layers-sidebar-close" class="flex items-center justify-center w-9 h-9 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors duration-200 touch-manipulation" aria-label="Fermer le menu">
+      <i data-lucide="x" class="w-4 h-4" aria-hidden="true"></i>
+    </button>
+  </div>
+  <div class="illeto-cartes-sidebar__body flex-1 overflow-y-auto scrollbar-thin p-3 space-y-5 bg-[#03050c]/92">
+    {% include "includes/navigation/atlas_menu_body.html" %}
+  </div>
+</aside>

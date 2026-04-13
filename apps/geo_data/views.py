@@ -20,6 +20,7 @@ from django.views.decorators.http import require_GET
 from apps.accounts.models import ExportLog, ShapefileLibraryEntry
 
 from .models import Commune, Departement, PointInteret, Quartier, Zone
+from .serializers import geometry_to_geojson_dict
 
 User = get_user_model()
 
@@ -84,7 +85,7 @@ def departement_geojson(request):
     """FeatureCollection GeoJSON : chaque Feature a un id (= pk) pour la synchro carte / filtres."""
     features = []
     for d in Departement.objects.all().order_by("name"):
-        geom = json.loads(d.geom.geojson) if d.geom else None
+        geom = geometry_to_geojson_dict(d.geom, 15) if d.geom else None
         features.append(
             {
                 "type": "Feature",
@@ -143,7 +144,7 @@ def communes_geojson(request):
 
     features = []
     for c in _commune_queryset_for_departement(dept_pk):
-        geom = json.loads(c.geom.geojson) if c.geom else None
+        geom = geometry_to_geojson_dict(c.geom, 15) if c.geom else None
         features.append(
             {
                 "type": "Feature",
@@ -185,7 +186,11 @@ def zones_geojson_by_commune(request):
     features = []
 
     for z in Zone.objects.filter(commune=commune).order_by("name"):
-        geom = json.loads(z.geom.geojson) if z.geom else None
+        if not z.geom or getattr(z.geom, "empty", False):
+            continue
+        geom = geometry_to_geojson_dict(z.geom, 15, polygonal_only=True)
+        if not geom:
+            continue
         features.append(
             {
                 "type": "Feature",
@@ -203,7 +208,11 @@ def zones_geojson_by_commune(request):
         )
 
     for q in Quartier.objects.filter(commune=commune).order_by("name"):
-        geom = json.loads(q.geom.geojson) if q.geom else None
+        if not q.geom or getattr(q.geom, "empty", False):
+            continue
+        geom = geometry_to_geojson_dict(q.geom, 15, polygonal_only=True)
+        if not geom:
+            continue
         features.append(
             {
                 "type": "Feature",
@@ -277,7 +286,7 @@ def poi_geojson(request):
 
     features = []
     for p in qs.order_by("name"):
-        geom = json.loads(p.geom.geojson) if p.geom else None
+        geom = geometry_to_geojson_dict(p.geom, 15) if p.geom else None
         features.append(
             {
                 "type": "Feature",

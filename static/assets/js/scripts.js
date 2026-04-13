@@ -11,6 +11,22 @@
     return Array.prototype.slice.call((root || document).querySelectorAll(sel));
   }
 
+  /** Flyouts bas d’écran Atlas (fonds / surcouches) : fermés par défaut ; complète `initAtlasFlyouts` inline dans atlas.html une fois la carte prête. */
+  function initAtlasFlyouts() {
+    var bf = document.getElementById("atlas-basemap-flyout");
+    var ef = document.getElementById("atlas-perspective-extras-flyout");
+    var sw = document.getElementById("perspective-switcher");
+    if (bf) bf.setAttribute("hidden", "");
+    if (ef) ef.setAttribute("hidden", "");
+    if (sw) {
+      var openB = sw.querySelector("[data-atlas-open-basemap]");
+      var openE = sw.querySelector("[data-atlas-open-extras]");
+      if (openB) openB.setAttribute("aria-expanded", "false");
+      if (openE) openE.setAttribute("aria-expanded", "false");
+    }
+  }
+  window.initAtlasFlyouts = initAtlasFlyouts;
+
   function initSiteHeader() {
     var header = qs("#site-header");
     if (!header) return;
@@ -1053,37 +1069,49 @@
     updateAtlasDataPanel();
   }
 
-  function setAtlasPerspectiveUI(root, mode) {
-    qsa("[data-layer-toggle]", root).forEach(function (btn) {
-      var m = btn.getAttribute("data-layer-toggle");
-      var on = m === mode;
-      var ring = qs("[data-active-glow]", btn);
-      btn.classList.toggle("text-primary", on);
-      btn.classList.toggle("text-muted-foreground", !on);
-      btn.classList.toggle("atlas-perspective-active", on);
-      btn.style.boxShadow = on
-        ? "0 0 20px oklch(0.62 0.16 160 / 0.45)"
-        : "";
-      if (ring) ring.classList.toggle("hidden", !on);
+  function atlasPerspectiveRoots() {
+    var roots = [];
+    var a = qs("#perspective-switcher");
+    var b = qs("#atlas-layers-sidebar");
+    if (a) roots.push(a);
+    if (b) roots.push(b);
+    return roots;
+  }
+
+  function setAtlasPerspectiveUI(mode) {
+    atlasPerspectiveRoots().forEach(function (root) {
+      qsa("[data-layer-toggle]", root).forEach(function (btn) {
+        var m = btn.getAttribute("data-layer-toggle");
+        var on = m === mode;
+        var ring = qs("[data-active-glow]", btn);
+        btn.classList.toggle("text-primary", on);
+        btn.classList.toggle("text-muted-foreground", !on);
+        btn.classList.toggle("atlas-perspective-active", on);
+        btn.style.boxShadow = on
+          ? "0 0 20px oklch(0.62 0.16 160 / 0.45)"
+          : "";
+        if (ring) ring.classList.toggle("hidden", !on);
+      });
     });
   }
 
   function initPerspectiveSwitcher() {
-    var root = qs("#perspective-switcher");
-    if (!root) return;
+    if (!atlasPerspectiveRoots().length) return;
     var defaultMode = "administrative";
-    setAtlasPerspectiveUI(root, defaultMode);
-    qsa("[data-layer-toggle]", root).forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var mode = btn.getAttribute("data-layer-toggle");
-        if (!mode) return;
-        setAtlasPerspectiveUI(root, mode);
-        if (
-          window.IlletoAtlasMap &&
-          typeof window.IlletoAtlasMap.setPerspective === "function"
-        ) {
-          window.IlletoAtlasMap.setPerspective(mode);
-        }
+    setAtlasPerspectiveUI(defaultMode);
+    atlasPerspectiveRoots().forEach(function (root) {
+      qsa("[data-layer-toggle]", root).forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var mode = btn.getAttribute("data-layer-toggle");
+          if (!mode) return;
+          setAtlasPerspectiveUI(mode);
+          if (
+            window.IlletoAtlasMap &&
+            typeof window.IlletoAtlasMap.setPerspective === "function"
+          ) {
+            window.IlletoAtlasMap.setPerspective(mode);
+          }
+        });
       });
     });
     if (
@@ -1092,6 +1120,19 @@
     ) {
       window.IlletoAtlasMap.setPerspective(defaultMode);
     }
+
+    window.IlletoAtlasPerspective = {
+      setMode: function (mode) {
+        if (!mode) return;
+        setAtlasPerspectiveUI(mode);
+        if (
+          window.IlletoAtlasMap &&
+          typeof window.IlletoAtlasMap.setPerspective === "function"
+        ) {
+          window.IlletoAtlasMap.setPerspective(mode);
+        }
+      },
+    };
   }
 
   function initCoordinatesDisplay() {
@@ -1231,7 +1272,22 @@
     });
   }
 
+  document.addEventListener(
+    "click",
+    function (e) {
+      var mapEl = document.getElementById("map");
+      if (!mapEl || !e.target || !mapEl.contains(e.target)) return;
+      if (typeof window.__atlasCloseBottomFlyouts === "function") {
+        window.__atlasCloseBottomFlyouts();
+      }
+    },
+    true
+  );
+
+  initAtlasFlyouts();
+
   document.addEventListener("DOMContentLoaded", function () {
+    initAtlasFlyouts();
     if (window.lucide) window.lucide.createIcons();
     initSiteHeader();
     initFloatingDock();

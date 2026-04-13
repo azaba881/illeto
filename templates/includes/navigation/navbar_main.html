@@ -1,0 +1,57 @@
+{% load static %}
+<header id="site-header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500 bg-transparent">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8">
+    <nav class="illeto-navbar-main flex items-stretch justify-between gap-3 min-h-[4.25rem] py-3">
+      <div class="flex items-stretch gap-3 min-w-0 shrink-0">
+        {% if request.resolver_match and request.resolver_match.view_name != 'website:atlas' %}
+        <button type="button" class="illeto-cartes-open-btn flex flex-col items-center justify-center rounded-lg shadow-md border px-3 min-w-[3.35rem] h-full self-stretch touch-manipulation transition-shadow duration-300" aria-expanded="false" aria-controls="atlas-layers-sidebar" aria-label="Ouvrir le menu cartes et fonds">
+          <i data-lucide="menu" class="w-5 h-5 text-primary-foreground shrink-0" aria-hidden="true"></i>
+          <span class="text-[8px] font-bold text-primary-foreground leading-tight mt-1 tracking-wide">CARTES</span>
+        </button>
+        {% endif %}
+        <a href="{% url 'website:index' %}" class="flex flex-col group shrink-0 self-center py-1" aria-label="Accueil Illeto">
+          <img src="{% static 'assets/images/logo.png' %}" alt="Illeto" class="w-30 w-20" style="filter: brightness(0) invert(1);zoom: 2;">
+        </a>
+      </div>
+      <div class="hidden md:flex items-center gap-12 self-center">
+        <a href="{% url 'website:index' %}" class="relative text-sm font-medium tracking-wide text-muted-foreground hover:text-foreground transition-colors duration-300 group">Accueil<span class="absolute -bottom-1 left-0 w-0 h-px bg-primary group-hover:w-full transition-all duration-300"></span></a>
+        <a href="{% url 'website:cartes' %}" class="relative text-sm font-medium tracking-wide text-muted-foreground hover:text-foreground transition-colors duration-300 group">Trouver une carte<span class="absolute -bottom-1 left-0 w-0 h-px bg-primary group-hover:w-full transition-all duration-300"></span></a>
+        <a href="{% url 'website:partenaire' %}" class="relative text-sm font-medium tracking-wide text-muted-foreground hover:text-foreground transition-colors duration-300 group">Devenir partenaire<span class="absolute -bottom-1 left-0 w-0 h-px bg-primary group-hover:w-full transition-all duration-300"></span></a>
+        <a href="{% url 'website:contact' %}" class="relative text-sm font-medium tracking-wide text-muted-foreground hover:text-foreground transition-colors duration-300 group">Nous contacter<span class="absolute -bottom-1 left-0 w-0 h-px bg-primary group-hover:w-full transition-all duration-300"></span></a>
+      </div>
+      <div class="hidden md:flex items-center gap-4 self-center">
+        <a href="{% url 'accounts:register' %}" class="group flex items-center gap-2 px-5 py-2.5">
+          <span class="text-sm font-medium text-primary">Inscrivez-vous</span>
+        </a>
+        <a href="{% url 'accounts:login' %}" class="group flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#0A3D36] hover:bg-accent/10 transition-all duration-300">
+          <i data-lucide="log-in" class="w-4 h-4 text-primary"></i>
+          <span class="text-sm font-medium text-primary">Se connecter</span>
+        </a>
+      </div>
+      <button type="button" id="mobile-menu-btn" class="md:hidden p-2 text-foreground self-center" aria-label="Menu" aria-expanded="false">
+        <svg id="mobile-menu-icon-open" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+        <svg id="mobile-menu-icon-close" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 hidden"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </nav>
+    <div id="mobile-menu-panel" class="md:hidden glass-panel rounded-2xl p-6 mb-4 hidden animate-in fade-in slide-in-from-top-2 duration-300">
+      <div class="flex flex-col gap-4">
+        {% if request.resolver_match and request.resolver_match.view_name != 'website:atlas' %}
+        <button type="button" class="illeto-cartes-open-btn flex flex-row items-center justify-center gap-2 rounded-xl border px-4 py-3 touch-manipulation w-full transition-shadow duration-300" aria-expanded="false" aria-controls="atlas-layers-sidebar" aria-label="Ouvrir le menu cartes">
+          <i data-lucide="menu" class="w-5 h-5 text-primary-foreground shrink-0" aria-hidden="true"></i>
+          <span class="text-sm font-bold text-primary-foreground tracking-wide">CARTES</span>
+        </button>
+        {% endif %}
+        <a href="{% url 'website:index' %}" class="text-lg font-medium text-muted-foreground hover:text-foreground transition-colors py-2">Accueil</a>
+        <a href="{% url 'website:cartes' %}" class="text-lg font-medium text-muted-foreground hover:text-foreground transition-colors py-2">Trouver une carte</a>
+        <a href="{% url 'website:contact' %}" class="text-lg font-medium text-muted-foreground hover:text-foreground transition-colors py-2">Nous contacter</a>
+        <a href="{% url 'website:partenaire' %}" class="text-lg font-medium text-muted-foreground hover:text-foreground transition-colors py-2">Devenir partenaire</a>
+        <hr class="border-border/30 my-2" />
+        <a href="{% url 'accounts:register' %}" class="text-lg font-medium text-primary py-2 text-center">Créer un compte</a>
+        <a href="{% url 'accounts:login' %}" class="flex items-center justify-center gap-2 px-5 py-3 rounded-lg border border-accent/50 bg-accent/10">
+          <i data-lucide="log-in" class="w-4 h-4 text-primary"></i>
+          <span class="text-sm font-medium text-primary">Se connecter</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</header>

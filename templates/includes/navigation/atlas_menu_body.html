@@ -1,0 +1,49 @@
+{% comment %}Fonds (accordéon fermé par défaut) + thématiques.{% endcomment %}
+<section class="rounded-xl border border-slate-400/25 bg-[#eef2f7] p-3 text-slate-800 shadow-sm dark:border-white/10 dark:bg-slate-800/90 dark:text-slate-100">
+  <button
+    type="button"
+    class="w-full flex items-center justify-between gap-2 text-left touch-manipulation rounded-lg py-1 -my-1 px-0.5 hover:bg-slate-200/60 dark:hover:bg-white/5 transition-colors"
+    data-illeto-cartes-accordion="fonds"
+    aria-expanded="false"
+    aria-controls="illeto-cartes-fonds-panel"
+    id="illeto-cartes-fonds-trigger"
+  >
+    <span class="text-[11px] font-bold uppercase tracking-wide text-slate-900 dark:text-slate-50">Fonds de carte</span>
+    <i data-lucide="chevron-down" class="illeto-cartes-accordion-chevron w-4 h-4 shrink-0 text-slate-600 dark:text-slate-300 transition-transform duration-200" aria-hidden="true"></i>
+  </button>
+  <div id="illeto-cartes-fonds-panel" class="hidden mt-3 space-y-3" data-illeto-cartes-accordion-panel="fonds" role="region" aria-labelledby="illeto-cartes-fonds-trigger">
+    <p class="text-[10px] text-slate-600 dark:text-slate-400 leading-snug">Choisissez un fond pour la carte Atlas (aperçu indicatif).</p>
+    <div class="grid grid-cols-2 gap-2.5">
+      <button type="button" data-basemap="satellite" class="group flex flex-col gap-1.5 text-center touch-manipulation rounded-lg p-0 border-0 bg-transparent">
+        <span class="atlas-menu-fond-thumb atlas-menu-fond-thumb--satellite aspect-[4/3] w-full rounded-md border border-slate-300/80 dark:border-white/15 shadow-inner"></span>
+        <span class="text-[10px] font-semibold text-slate-700 dark:text-slate-200 leading-tight">Photographies aériennes</span>
+      </button>
+      <button type="button" data-basemap="administrative" class="group flex flex-col gap-1.5 text-center touch-manipulation rounded-lg p-0 border-0 bg-transparent">
+        <span class="atlas-menu-fond-thumb atlas-menu-fond-thumb--plan aspect-[4/3] w-full rounded-md border border-slate-300/80 dark:border-white/15 shadow-inner"></span>
+        <span class="text-[10px] font-semibold text-slate-700 dark:text-slate-200 leading-tight">Plan</span>
+      </button>
+      <button type="button" data-basemap="dark" class="group flex flex-col gap-1.5 text-center touch-manipulation rounded-lg p-0 border-0 bg-transparent">
+        <span class="atlas-menu-fond-thumb atlas-menu-fond-thumb--dark aspect-[4/3] w-full rounded-md border border-slate-300/80 dark:border-white/15 shadow-inner"></span>
+        <span class="text-[10px] font-semibold text-slate-700 dark:text-slate-200 leading-tight">Plan détaillé</span>
+      </button>
+      <button type="button" data-extra-layer="relief" class="group flex flex-col gap-1.5 text-center touch-manipulation rounded-lg p-0 border-0 bg-transparent">
+        <span class="atlas-menu-fond-thumb atlas-menu-fond-thumb--relief aspect-[4/3] w-full rounded-md border border-slate-300/80 dark:border-white/15 shadow-inner"></span>
+        <span class="text-[10px] font-semibold text-slate-700 dark:text-slate-200 leading-tight">Relief</span>
+      </button>
+    </div>
+    <button
+      type="button"
+      data-atlas-open-bottom-basemap-flyout
+      class="atlas-menu-fonds-all-btn w-full rounded-full py-2.5 px-3 text-xs font-semibold border transition-colors shadow-sm"
+    >
+      Voir tous les fonds de carte
+    </button>
+  </div>
+</section>
+<section aria-labelledby="atlas-thematiques-label" class="pt-1">
+  <h3 id="atlas-thematiques-label" class="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">Données thématiques</h3>
+  <p class="text-[9px] text-muted-foreground/90 mb-2 leading-relaxed">API <span class="font-mono">/geo/</span> — activez <span class="font-mono">data-geo-ready="true"</span> sur une ligne pour brancher la couche.</p>
+  <div class="flex flex-col gap-1">
+    {% include "includes/navigation/atlas_menu_thematic_rows.html" %}
+  </div>
+</section>

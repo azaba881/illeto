@@ -295,153 +295,92 @@
       </section>
 
       <section class="relative py-24 px-6 overflow-hidden">
-        <div class="max-w-7xl mx-auto mb-20">
+        <div class="max-w-7xl mx-auto mb-14">
           <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div>
-              <span class="text-xs font-mono tracking-widest text-primary uppercase mb-4 block">Flux de données</span>
-              <h2 class="font-serif text-4xl sm:text-5xl lg:text-6xl leading-tight">Données à <span class="italic text-accent">haute résolution</span></h2>
+              <span class="text-xs font-mono tracking-widest text-primary uppercase mb-4 block">Thématiques</span>
+              <h2 class="font-serif text-4xl sm:text-5xl lg:text-6xl leading-tight">Données par <span class="italic text-accent">domaine</span></h2>
             </div>
-            <p class="max-w-md text-muted-foreground font-mono text-sm leading-relaxed">Trois couches de données structurantes pour les décisions publiques, la recherche et les entreprises sur tout le territoire béninois.</p>
+            <p class="max-w-md text-muted-foreground text-sm leading-relaxed">Neuf familles de référentiels et de couches, alignées sur une logique institutionnelle — ouverture directe dans l’Atlas IlèTô.</p>
           </div>
         </div>
-        <div class="max-w-7xl mx-auto">
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div data-showcase-card data-glow="oklch(0.55 0.15 160 / 0.4)" class="group relative" style="animation-delay: 0ms">
-              <div data-showcase-inner class="relative glass-panel rounded-2xl overflow-hidden card-lift">
-                <div class="relative h-48 overflow-hidden bg-slate-deep/50">
-                  <div class="absolute inset-0 flex items-center justify-center p-4">
-                    <svg viewBox="0 0 200 160" class="w-full h-full">
-                      <defs>
-                        <pattern id="adminGrid" width="20" height="20" patternUnits="userSpaceOnUse">
-                          <path d="M 20 0 L 0 0 0 20" fill="none" stroke="oklch(0.55 0.15 160 / 0.1)" stroke-width="0.5"/>
-                        </pattern>
-                        <filter id="adminGlow">
-                          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-                          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                        </filter>
-                      </defs>
-                      <rect width="200" height="160" fill="url(#adminGrid)"/>
-                      <g filter="url(#adminGlow)">
-                        <path d="M 40 80 L 60 60 L 90 55 L 120 65 L 140 80 L 130 110 L 100 120 L 70 115 L 45 100 Z" fill="oklch(0.55 0.15 160 / 0.3)" stroke="#00875A" stroke-width="2" class="animate-subtle-pulse"/>
-                        <path d="M 90 55 L 120 45 L 150 55 L 140 80 L 120 65 Z" fill="oklch(0.55 0.15 160 / 0.2)" stroke="#00875A" stroke-width="1.5"/>
-                        <path d="M 60 60 L 70 40 L 100 35 L 120 45 L 90 55 Z" fill="oklch(0.55 0.15 160 / 0.25)" stroke="#00875A" stroke-width="1.5"/>
-                      </g>
-                      <circle cx="85" cy="85" r="3" fill="#00875A" class="animate-subtle-pulse"/>
-                      <circle cx="115" cy="60" r="2.5" fill="#00875A"/>
-                      <circle cx="100" cy="45" r="2" fill="#00875A"/>
-                    </svg>
-                  </div>
-                  <div class="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent pointer-events-none"></div>
-                  <div class="absolute top-4 left-4 w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: #00875A20; color: #00875A;">
-                    <i data-lucide="map-pin" class="w-5 h-5"></i>
-                  </div>
-                </div>
-                <div class="p-6">
-                  <h3 class="font-serif text-xl mb-2 group-hover:text-primary transition-colors duration-300">Limites Officielles</h3>
-                  <p class="text-sm text-muted-foreground mb-4 font-mono">Limites administratives en précision vectorielle</p>
-                  <div class="flex items-center justify-between">
-                    <span class="text-xs font-mono tracking-wide" style="color: #00875A;">77 Communes, +5000 Quartiers</span>
-                    <i data-lucide="arrow-right" class="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-300"></i>
-                  </div>
-                </div>
-              </div>
+        <div class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <a href="{% url 'website:atlas' %}?thematic=agriculture" class="group relative glass-panel rounded-2xl border border-glass-border/60 p-5 flex gap-4 items-start card-lift hover:border-primary/30 transition-all duration-300">
+            <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl text-white shadow-lg shadow-black/20" style="background-color:#005ea5"><i data-lucide="leaf" class="w-7 h-7"></i></span>
+            <div class="min-w-0 flex-1">
+              <h3 class="font-serif text-lg text-foreground mb-1 group-hover:text-primary transition-colors">Agriculture</h3>
+              <p class="text-xs text-muted-foreground leading-relaxed">Occupation des sols, parcelles et filières — vue terrain dans l’Atlas.</p>
+              <span class="inline-flex items-center gap-1 mt-3 text-[11px] font-medium text-primary/90">Ouvrir <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform"></i></span>
             </div>
-            <div data-showcase-card data-glow="oklch(0.7 0.12 180 / 0.4)" class="group relative" style="animation-delay: 100ms">
-              <div data-showcase-inner class="relative glass-panel rounded-2xl overflow-hidden card-lift">
-                <div class="relative h-48 overflow-hidden bg-slate-deep/50">
-                  <div class="absolute inset-0 flex items-center justify-center p-4">
-                    <svg viewBox="0 0 200 160" class="w-full h-full">
-                      <defs>
-                        <linearGradient id="riverGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                          <stop offset="0%" stop-color="#4ECDC4" stop-opacity="0.8"/>
-                          <stop offset="100%" stop-color="#4ECDC4" stop-opacity="0.3"/>
-                        </linearGradient>
-                        <filter id="waterGlow">
-                          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                        </filter>
-                      </defs>
-                      <g filter="url(#waterGlow)">
-                        <path d="M 20 80 Q 60 70 100 85 T 180 75" fill="none" stroke="url(#riverGradient)" stroke-width="4" class="animate-glow-pulse"/>
-                        <path d="M 100 85 Q 110 60 90 40" fill="none" stroke="#4ECDC4" stroke-width="2" stroke-opacity="0.6"/>
-                        <path d="M 100 85 Q 130 100 140 130" fill="none" stroke="#4ECDC4" stroke-width="2" stroke-opacity="0.5"/>
-                        <path d="M 60 73 Q 70 50 60 30" fill="none" stroke="#4ECDC4" stroke-width="1.5" stroke-opacity="0.4"/>
-                      </g>
-                      <ellipse cx="100" cy="90" rx="40" ry="25" fill="oklch(0.7 0.12 180 / 0.15)" stroke="oklch(0.7 0.12 180 / 0.3)" stroke-width="1" stroke-dasharray="4 2"/>
-                      <ellipse cx="140" cy="100" rx="25" ry="15" fill="oklch(0.7 0.12 180 / 0.1)" stroke="oklch(0.7 0.12 180 / 0.2)" stroke-width="1" stroke-dasharray="4 2"/>
-                      <circle cx="80" cy="95" r="4" fill="oklch(0.55 0.15 160 / 0.5)"/>
-                      <circle cx="120" cy="85" r="3" fill="oklch(0.55 0.15 160 / 0.4)"/>
-                    </svg>
-                  </div>
-                  <div class="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent pointer-events-none"></div>
-                  <div class="absolute top-4 left-4 w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: #4ECDC420; color: #4ECDC4;">
-                    <i data-lucide="droplets" class="w-5 h-5"></i>
-                  </div>
-                </div>
-                <div class="p-6">
-                  <h3 class="font-serif text-xl mb-2 group-hover:text-primary transition-colors duration-300">Zonage Environnemental</h3>
-                  <p class="text-sm text-muted-foreground mb-4 font-mono">Zones inondables, hydrographie, occupation des sols</p>
-                  <div class="flex items-center justify-between">
-                    <span class="text-xs font-mono tracking-wide" style="color: #4ECDC4;">Inondations, cours d'eau, zonages</span>
-                    <i data-lucide="arrow-right" class="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-300"></i>
-                  </div>
-                </div>
-              </div>
+          </a>
+          <a href="{% url 'website:atlas' %}?thematic=culture_patrimoine" class="group relative glass-panel rounded-2xl border border-glass-border/60 p-5 flex gap-4 items-start card-lift hover:border-primary/30 transition-all duration-300">
+            <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl text-white shadow-lg shadow-black/20" style="background-color:#005ea5"><i data-lucide="landmark" class="w-7 h-7"></i></span>
+            <div class="min-w-0 flex-1">
+              <h3 class="font-serif text-lg text-foreground mb-1 group-hover:text-primary transition-colors">Culture et patrimoine</h3>
+              <p class="text-xs text-muted-foreground leading-relaxed">Sites, monuments et inventaires à raccorder aux flux /geo/.</p>
+              <span class="inline-flex items-center gap-1 mt-3 text-[11px] font-medium text-primary/90">Ouvrir <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform"></i></span>
             </div>
-            <div data-showcase-card data-glow="oklch(0.55 0.1 55 / 0.4)" class="group relative" style="animation-delay: 200ms">
-              <div data-showcase-inner class="relative glass-panel rounded-2xl overflow-hidden card-lift">
-                <div class="relative h-48 overflow-hidden bg-slate-deep/50">
-                  <div class="absolute inset-0 flex items-center justify-center p-4">
-                    <svg viewBox="0 0 200 160" class="w-full h-full">
-                      <defs>
-                        <filter id="goldGlow">
-                          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-                          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                        </filter>
-                      </defs>
-                      <g stroke="oklch(0.5 0.02 260)" stroke-width="1" fill="none" opacity="0.4">
-                        <line x1="20" y1="80" x2="180" y2="80"/>
-                        <line x1="100" y1="20" x2="100" y2="140"/>
-                        <line x1="40" y1="40" x2="160" y2="120"/>
-                        <line x1="160" y1="40" x2="40" y2="120"/>
-                      </g>
-                      <g stroke="#A67C52" stroke-width="2" fill="none" opacity="0.8">
-                        <line x1="20" y1="80" x2="180" y2="80"/>
-                        <line x1="100" y1="20" x2="100" y2="140"/>
-                      </g>
-                      <g filter="url(#goldGlow)">
-                        <circle cx="70" cy="60" r="5" fill="#A67C52" class="animate-subtle-pulse"/>
-                        <circle cx="130" cy="100" r="5" fill="#A67C52" class="animate-subtle-pulse"/>
-                        <circle cx="100" cy="80" r="6" fill="#A67C52"/>
-                      </g>
-                      <g stroke="oklch(0.7 0.15 55 / 0.5)" stroke-width="1" stroke-dasharray="6 3">
-                        <line x1="30" y1="50" x2="170" y2="50"/>
-                        <line x1="30" y1="110" x2="170" y2="110"/>
-                      </g>
-                      <rect x="45" y="105" width="8" height="10" fill="#A67C52" opacity="0.7"/>
-                      <rect x="145" y="45" width="8" height="10" fill="#A67C52" opacity="0.7"/>
-                    </svg>
-                  </div>
-                  <div class="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent pointer-events-none"></div>
-                  <div class="absolute top-4 left-4 w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: #A67C5220; color: #A67C52;">
-                    <i data-lucide="zap" class="w-5 h-5"></i>
-                  </div>
-                </div>
-                <div class="p-6">
-                  <h3 class="font-serif text-xl mb-2 group-hover:text-primary transition-colors duration-300">Réseaux &amp; Infrastructures</h3>
-                  <p class="text-sm text-muted-foreground mb-4 font-mono">Infrastructures critiques et données de connectivité</p>
-                  <div class="flex items-center justify-between">
-                    <span class="text-xs font-mono tracking-wide" style="color: #A67C52;">Énergie, santé, réseau routier</span>
-                    <i data-lucide="arrow-right" class="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-300"></i>
-                  </div>
-                </div>
-              </div>
+          </a>
+          <a href="{% url 'website:atlas' %}?thematic=developpement_durable" class="group relative glass-panel rounded-2xl border border-glass-border/60 p-5 flex gap-4 items-start card-lift hover:border-primary/30 transition-all duration-300">
+            <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl text-white shadow-lg shadow-black/20" style="background-color:#005ea5"><i data-lucide="recycle" class="w-7 h-7"></i></span>
+            <div class="min-w-0 flex-1">
+              <h3 class="font-serif text-lg text-foreground mb-1 group-hover:text-primary transition-colors">Développement durable, énergie</h3>
+              <p class="text-xs text-muted-foreground leading-relaxed">Environnement, ressources et indicateurs de transition.</p>
+              <span class="inline-flex items-center gap-1 mt-3 text-[11px] font-medium text-primary/90">Ouvrir <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform"></i></span>
             </div>
-          </div>
+          </a>
+          <a href="{% url 'website:atlas' %}?thematic=economie_stat" class="group relative glass-panel rounded-2xl border border-glass-border/60 p-5 flex gap-4 items-start card-lift hover:border-primary/30 transition-all duration-300">
+            <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl text-white shadow-lg shadow-black/20" style="background-color:#005ea5"><i data-lucide="pie-chart" class="w-7 h-7"></i></span>
+            <div class="min-w-0 flex-1">
+              <h3 class="font-serif text-lg text-foreground mb-1 group-hover:text-primary transition-colors">Économie et statistique</h3>
+              <p class="text-xs text-muted-foreground leading-relaxed">Territoires, emploi et agrégats à croiser avec la maille SIG.</p>
+              <span class="inline-flex items-center gap-1 mt-3 text-[11px] font-medium text-primary/90">Ouvrir <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform"></i></span>
+            </div>
+          </a>
+          <a href="{% url 'website:atlas' %}?thematic=education_recherche" class="group relative glass-panel rounded-2xl border border-glass-border/60 p-5 flex gap-4 items-start card-lift hover:border-primary/30 transition-all duration-300">
+            <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl text-white shadow-lg shadow-black/20" style="background-color:#005ea5"><i data-lucide="book-open" class="w-7 h-7"></i></span>
+            <div class="min-w-0 flex-1">
+              <h3 class="font-serif text-lg text-foreground mb-1 group-hover:text-primary transition-colors">Éducation et recherche</h3>
+              <p class="text-xs text-muted-foreground leading-relaxed">Établissements et données ouvertes pour la communauté académique.</p>
+              <span class="inline-flex items-center gap-1 mt-3 text-[11px] font-medium text-primary/90">Ouvrir <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform"></i></span>
+            </div>
+          </a>
+          <a href="{% url 'website:atlas' %}?thematic=international_europe" class="group relative glass-panel rounded-2xl border border-glass-border/60 p-5 flex gap-4 items-start card-lift hover:border-primary/30 transition-all duration-300">
+            <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl text-white shadow-lg shadow-black/20" style="background-color:#005ea5"><i data-lucide="globe" class="w-7 h-7"></i></span>
+            <div class="min-w-0 flex-1">
+              <h3 class="font-serif text-lg text-foreground mb-1 group-hover:text-primary transition-colors">International et Europe</h3>
+              <p class="text-xs text-muted-foreground leading-relaxed">Référentiels transfrontaliers et standards partagés.</p>
+              <span class="inline-flex items-center gap-1 mt-3 text-[11px] font-medium text-primary/90">Ouvrir <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform"></i></span>
+            </div>
+          </a>
+          <a href="{% url 'website:atlas' %}?thematic=sante_social" class="group relative glass-panel rounded-2xl border border-glass-border/60 p-5 flex gap-4 items-start card-lift hover:border-primary/30 transition-all duration-300">
+            <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl text-white shadow-lg shadow-black/20" style="background-color:#005ea5"><i data-lucide="heart-pulse" class="w-7 h-7"></i></span>
+            <div class="min-w-0 flex-1">
+              <h3 class="font-serif text-lg text-foreground mb-1 group-hover:text-primary transition-colors">Santé et social</h3>
+              <p class="text-xs text-muted-foreground leading-relaxed">Offre de soins, équipements et vulnérabilités territoriales.</p>
+              <span class="inline-flex items-center gap-1 mt-3 text-[11px] font-medium text-primary/90">Ouvrir <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform"></i></span>
+            </div>
+          </a>
+          <a href="{% url 'website:atlas' %}?thematic=tourisme_loisirs" class="group relative glass-panel rounded-2xl border border-glass-border/60 p-5 flex gap-4 items-start card-lift hover:border-primary/30 transition-all duration-300">
+            <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl text-white shadow-lg shadow-black/20" style="background-color:#005ea5"><i data-lucide="users" class="w-7 h-7"></i></span>
+            <div class="min-w-0 flex-1">
+              <h3 class="font-serif text-lg text-foreground mb-1 group-hover:text-primary transition-colors">Tourisme et loisirs</h3>
+              <p class="text-xs text-muted-foreground leading-relaxed">Attractivité, itinéraires et équipements d’accueil.</p>
+              <span class="inline-flex items-center gap-1 mt-3 text-[11px] font-medium text-primary/90">Ouvrir <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform"></i></span>
+            </div>
+          </a>
+          <a href="{% url 'website:atlas' %}?thematic=territoires_transports" class="group relative glass-panel rounded-2xl border border-glass-border/60 p-5 flex gap-4 items-start card-lift hover:border-primary/30 transition-all duration-300">
+            <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl text-white shadow-lg shadow-black/20" style="background-color:#005ea5"><i data-lucide="map-pin" class="w-7 h-7"></i></span>
+            <div class="min-w-0 flex-1">
+              <h3 class="font-serif text-lg text-foreground mb-1 group-hover:text-primary transition-colors">Territoires et transports</h3>
+              <p class="text-xs text-muted-foreground leading-relaxed">Réseaux, corridors et découpage administratif opérationnel.</p>
+              <span class="inline-flex items-center gap-1 mt-3 text-[11px] font-medium text-primary/90">Ouvrir <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform"></i></span>
+            </div>
+          </a>
         </div>
-        <div class="max-w-7xl mx-auto mt-16 text-center">
+        <div class="max-w-7xl mx-auto mt-14 text-center">
           <a href="{% url 'website:atlas' %}" class="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-all duration-300 group emerald-glow">
-            <span>Explorer l'Atlas</span>
+            <span>Explorer l’Atlas</span>
             <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
           </a>
         </div>

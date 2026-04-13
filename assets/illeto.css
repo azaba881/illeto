@@ -1378,3 +1378,136 @@ html.light .glass-panel {
   border-color: rgba(45, 212, 191, 0.45) !important;
   box-shadow: 0 0 0 1px rgba(45, 212, 191, 0.2) !important;
 }
+
+/* ------------------------------------------------------------------
+   Menu global « CARTES » (sidebar + voile)
+------------------------------------------------------------------ */
+.illeto-cartes-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  background: rgba(3, 5, 12, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.28s ease, visibility 0.28s ease;
+}
+.illeto-cartes-backdrop.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+.illeto-cartes-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 1060;
+  width: min(18rem, 92vw);
+  max-width: 100%;
+  transform: translateX(-100%);
+  transition:
+    transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0.32s step-end;
+  border-radius: 0 1rem 1rem 0;
+  box-shadow: 12px 0 48px rgba(0, 0, 0, 0.5);
+  visibility: hidden;
+  pointer-events: none;
+}
+.illeto-cartes-sidebar.is-open {
+  transform: translateX(0);
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s step-start;
+}
+/* Atlas : menu calé sur l’emprise de la carte ; z-index > Leaflet panes (~400–700) et Mapbox */
+body.atlas-page .illeto-cartes-backdrop {
+  z-index: 10090;
+  top: 1.5rem;
+  bottom: 1.5rem;
+  left: calc(1.5rem + 18rem + 1rem);
+  right: calc(5rem + 18rem + 1rem);
+  border-radius: 1rem;
+}
+body.atlas-page .illeto-cartes-sidebar {
+  z-index: 10100;
+  top: 1.5rem;
+  bottom: 1.5rem;
+  left: calc(1.5rem + 18rem + 1rem);
+  width: min(17.5rem, calc(100vw - 2rem));
+  max-width: 88vw;
+  height: auto;
+  transform: translateX(calc(-100% - 14px));
+  border-radius: 0 1rem 1rem 0;
+  visibility: hidden;
+  pointer-events: none !important;
+}
+body.atlas-page .illeto-cartes-sidebar.is-open {
+  transform: translateX(0);
+  visibility: visible;
+  pointer-events: auto !important;
+}
+#atlas-layers-sidebar.illeto-cartes-sidebar:not(.is-open) {
+  pointer-events: none !important;
+}
+@media (max-width: 1200px) {
+  body.atlas-page .illeto-cartes-backdrop {
+    left: 1rem;
+    right: 1rem;
+    top: 5rem;
+    bottom: 5.5rem;
+  }
+  body.atlas-page .illeto-cartes-sidebar {
+    left: 1rem;
+    top: 5rem;
+    bottom: 5.5rem;
+    height: auto;
+  }
+}
+.illeto-cartes-open-btn {
+  flex-shrink: 0;
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border-color: color-mix(in oklab, var(--primary-foreground) 28%, transparent);
+}
+
+/* Miniatures « Fonds de carte » (menu latéral global) */
+.atlas-menu-fond-thumb {
+  display: block;
+  background-size: cover;
+  background-position: center;
+}
+.atlas-menu-fond-thumb--satellite {
+  background-image: linear-gradient(135deg, #14532d 0%, #713f12 42%, #292524 100%);
+}
+.atlas-menu-fond-thumb--plan {
+  background-image: linear-gradient(180deg, #dbeafe 0%, #ecfdf5 40%, #bbf7d0 100%);
+}
+.atlas-menu-fond-thumb--dark {
+  background-image: linear-gradient(180deg, #334155 0%, #0f172a 100%);
+}
+.atlas-menu-fond-thumb--relief {
+  background-image: linear-gradient(135deg, #78716c 0%, #a8a29e 38%, #44403c 100%);
+}
+
+.atlas-menu-fonds-all-btn {
+  background-color: oklch(0.22 0.02 260);
+  color: oklch(0.96 0.01 95);
+  border-color: oklch(0.32 0.02 260);
+}
+.atlas-menu-fonds-all-btn:hover {
+  background-color: oklch(0.28 0.02 260);
+}
+.illeto-cartes-open-btn.is-active {
+  box-shadow:
+    0 0 0 2px color-mix(in oklab, var(--primary-foreground) 38%, transparent),
+    0 0 22px color-mix(in oklab, var(--primary) 65%, transparent),
+    0 0 36px color-mix(in oklab, var(--primary) 45%, transparent);
+}
+body.illeto-cartes-menu-open .illeto-cartes-open-btn:not(.is-active) {
+  opacity: 0.92;
+}
