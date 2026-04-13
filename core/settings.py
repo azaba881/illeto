@@ -5,6 +5,8 @@ Environment-driven configuration with django-environ, PostGIS, and GeoDjango.
 """
 
 import os
+from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
+
 import dj_database_url
 from pathlib import Path
 
@@ -170,19 +172,58 @@ DATABASE_LOCAL = {
     'PORT': '5432',
 }
 
-# 2. On regarde si Render nous donne une URL de base de données
-DATABASE_URL = os.environ.get('DATABASE_URL')
+# 2. On regarde si une URL de base de données est fournie (.env / Render)
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+
+def _is_local_postgres_url(url: str) -> bool:
+    try:
+        host = (urlparse(url).hostname or "").lower()
+        return host in ("localhost", "127.0.0.1", "::1")
+    except Exception:
+        return False
+
+
+def _strip_sslmode_from_database_url(url: str) -> str:
+    """Évite ?sslmode=require copié depuis Render alors que le host est local."""
+    p = urlparse(url)
+    q = [
+        (k, v)
+        for k, v in parse_qsl(p.query, keep_blank_values=True)
+        if k.lower() != "sslmode"
+    ]
+    return urlunparse(
+        (p.scheme, p.netloc, p.path, p.params, urlencode(q), p.fragment)
+    )
+
+
+def _postgres_url_requires_ssl(url: str) -> bool:
+    """SSL pour hôtes distants uniquement (Render, etc.)."""
+    if _is_local_postgres_url(url):
+        return False
+    if "ILLETO_DATABASE_SSL_REQUIRE" in os.environ:
+        return env.bool("ILLETO_DATABASE_SSL_REQUIRE", default=True)
+    return True
+
 
 if DATABASE_URL:
-    # SI OUI : On est sur Render, on utilise sa config avec SSL
+    _db_url = (
+        _strip_sslmode_from_database_url(DATABASE_URL)
+        if _is_local_postgres_url(DATABASE_URL)
+        else DATABASE_URL
+    )
     DATABASES = {
-        'default': dj_database_url.config(
-            default=DATABASE_URL,
+        "default": dj_database_url.config(
+            default=_db_url,
             conn_max_age=600,
-            ssl_require=True
+            ssl_require=_postgres_url_requires_ssl(DATABASE_URL),
         )
     }
     DATABASES["default"]["ENGINE"] = "django.contrib.gis.db.backends.postgis"
+    if _is_local_postgres_url(DATABASE_URL):
+        _opts = DATABASES["default"].get("OPTIONS")
+        if isinstance(_opts, dict):
+            _opts.pop("sslmode", None)
 else:
     # SI NON : On est sur ton PC, on utilise la config locale
     DATABASES = {
